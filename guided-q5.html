@@ -57,7 +57,7 @@ pre.log{white-space:pre-wrap;background:#f8fafc;border:1px solid #e4e7ec;border-
 
 <script>
 (function(){
-var state={started:Date.now(),route:[],levels:{reading:0,A:0,B:0,C:0,D:0,final:0,transfer:0},stopped:false};
+var state={started:Date.now(),route:[],levels:{reading:-1,A:-1,B:-1,C:-1,D:-1,final:-1,transfer:-1},stopped:false};
 var stage=document.getElementById('stage'),result=document.getElementById('result'),fill=document.getElementById('fill'),status=document.getElementById('status');
 function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function setProg(p,t){fill.style.width=p+'%';status.textContent=t;}
@@ -109,8 +109,8 @@ function(v){if(v==='__UNKNOWN__')return stop('A_mini');log('A_mini_verify',v,'co
 
 function gateB(){setProg(38,'第 2 關 B｜逐項判斷');mount(
 '<div class="step">第 2 關 B｜這是原答卷中漏掉的選項</div><div class="code">i = 0\nwhile i &lt; 0:\n    print(i)</div>'+
-'<div class="prompt">B. 把條件改成 <code>while i &lt; 0</code>。現在 i 一開始等於 0。程式進入迴圈前先檢查條件，這個迴圈會開始執行嗎？</div>'+
-opt('A. 能','YES')+opt('B. 不能','NO')+unk(),
+'<div class="prompt">B. 把條件改成 <code>while i &lt; 0</code>。現在 i 一開始等於 0。這樣做能讓迴圈一開始就不進入第一圈嗎？</div>'+
+opt('A. 能，因為 0 < 0 一開始就是 False','YES')+opt('B. 不能，它還是會先執行一圈','NO')+unk(),
 function(v){if(v==='__UNKNOWN__')return stop('B');log('B_first',v,'condition i < 0 with i=0');if(v==='YES'){state.levels.B=0;gateC();}else{state.levels.B=1;gateBHint();}});}
 function gateBHint(){setProg(41,'Gate 2B｜Hint');mount(
 '<div class="step">B｜提示</div><div class="fb bad">while 在跑第一圈之前就先檢查條件。</div><div class="prompt">現在 i = 0。判斷 <code>0 &lt; 0</code> 是：</div>'+
@@ -225,22 +225,33 @@ function(v){if(v==='__UNKNOWN__')stop('transfer_repair');});
 document.getElementById('tryTransfer').onclick=function(){transfer();};
 }
 
-function levelText(n){return n===0?'首次通過':(n===1?'提示後通過':'Mini Lesson 後通過');}
+function levelText(n){return n===-1?'未進行':(n===0?'首次通過':(n===1?'提示後通過':'Mini Lesson 後通過'));}
 function makeSummary(){var rows=[['題意 eventually stop',levelText(state.levels.reading)],['A｜控制變數更新',levelText(state.levels.A)],['B｜0 次執行陷阱',levelText(state.levels.B)],['C｜無關修改辨識',levelText(state.levels.C)],['D｜break',levelText(state.levels.D)]],out='';for(var i=0;i<rows.length;i++)out+='<div class="kpi"><span class="small">'+rows[i][0]+'</span><b>'+rows[i][1]+'</b></div>';return out;}
-function diagnosticText(){var weak=[];if(state.levels.reading>0)weak.push('英文題意 / eventually stop');if(state.levels.A>0)weak.push('控制變數如何讓 while 終止');if(state.levels.B>0)weak.push('while 先檢查條件、可執行 0 次');if(state.levels.C>0)weak.push('辨識「改了程式但沒改終止條件」');if(state.levels.D>0)weak.push('break 的作用');return weak.length?'本次真正需要補強：'+weak.join('、')+'。':'本題核心概念可直接辨識；後續重點是維持複選題逐項判斷習慣。';}
+function diagnosticText(){
+  if(state.stopped){
+    var last=state.route.length?state.route[state.route.length-1]:null;
+    return '學生在「'+(last?last.step:'未知階段')+'」選擇「不懂／不知道怎麼判斷」，本題應標記為 Needs Reteaching，不再把未進行的關卡視為已通過。';
+  }
+  var weak=[];
+  if(state.levels.reading>0)weak.push('英文題意 / eventually stop');
+  if(state.levels.A>0)weak.push('控制變數如何讓 while 終止');
+  if(state.levels.B>0)weak.push('while 先檢查條件、可執行 0 次');
+  if(state.levels.C>0)weak.push('辨識「改了程式但沒改終止條件」');
+  if(state.levels.D>0)weak.push('break 的作用');
+  return weak.length?'本次真正需要補強：'+weak.join('、')+'。':'本題核心概念可直接辨識；後續重點是維持複選題逐項判斷習慣。';
+}
 function routeText(){
   var a=[];
   for(var i=0;i<state.route.length;i++){
     var r=state.route[i];
     a.push((i+1)+'. '+r.step+' → '+r.answer+(r.note?' | '+r.note:''));
   }
-  return a.join('
-');
+  return a.join('\n');
 }
 function resultText(kind){
   var lines=[];
   lines.push('En-Xiang Python Q5 Guided Correction - Result');
-  lines.push('Version: GUIDED_Q5_BRANCHING_20260928_V2');
+  lines.push('Version: GUIDED_Q5_BRANCHING_20260928_V3_FIXED');
   lines.push('Completed: '+(new Date()).toLocaleString());
   lines.push('Status: '+(kind==='stopped'?'NOT UNDERSTOOD / STOPPED':'GUIDED CORRECTION COMPLETED'));
   lines.push('');
@@ -260,8 +271,7 @@ function resultText(kind){
   lines.push('');
   lines.push('ANSWER PATH');
   lines.push(routeText());
-  return lines.join('
-');
+  return lines.join('\r\n');
 }
 function copyResult(kind){
   var txt=resultText(kind);
