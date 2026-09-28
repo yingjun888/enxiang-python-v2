@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="format-detection" content="telephone=no">
+<title>En-Xiang Python V2 - Mobile Exam</title>
+<style>
+html,body{margin:0;padding:0;min-height:100%;background:#f2f4f7;color:#182230;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;-webkit-text-size-adjust:100%;}
+*{box-sizing:border-box}
+button,input{font:inherit}
+body{padding-bottom:calc(86px + env(safe-area-inset-bottom));}
+.app{max-width:680px;margin:0 auto;min-height:100vh;}
+.topbar{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.97);border-bottom:1px solid #d9dee7;padding:calc(8px + env(safe-area-inset-top)) 12px 9px;box-shadow:0 1px 4px rgba(16,24,40,.05)}
+.topline{display:flex;align-items:center;gap:10px}
+.brand{font-weight:800;font-size:17px;line-height:1.15;flex:1}
+.timer{font-variant-numeric:tabular-nums;font-weight:700;font-size:15px;white-space:nowrap}
+.progressText{font-size:12px;color:#667085;margin-top:5px;display:flex;justify-content:space-between;gap:12px}
+.track{height:6px;background:#e4e7ec;border-radius:999px;overflow:hidden;margin-top:7px}
+.fill{height:100%;width:2%;background:#175cd3;transition:width .2s ease}
+.main{padding:12px 10px 24px}
+.lineTip{display:none;background:#fff7e8;border:1px solid #f4c76b;border-radius:12px;padding:10px 12px;margin-bottom:10px;font-size:13px;line-height:1.45;color:#6b4b00}
+.card{background:#fff;border:1px solid #d8dee8;border-radius:16px;padding:16px 14px;box-shadow:0 1px 2px rgba(16,24,40,.04)}
+.qhead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.qnum{font-size:14px;font-weight:800;color:#344054}
+.qtype{font-size:12px;font-weight:700;color:#1849a9;background:#eff4ff;border-radius:999px;padding:6px 9px;white-space:nowrap}
+.prompt{font-size:19px;line-height:1.45;font-weight:760;margin:4px 0 12px;overflow-wrap:anywhere}
+.code{margin:9px 0 14px;background:#111827;color:#f9fafb;border-radius:11px;padding:12px;overflow-x:auto;-webkit-overflow-scrolling:touch;white-space:pre;font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace}
+.options{display:block}
+.option{display:flex;align-items:flex-start;gap:10px;width:100%;min-height:56px;padding:12px;margin:9px 0;border:1.5px solid #d0d5dd;border-radius:13px;background:#fff;line-height:1.4;-webkit-tap-highlight-color:transparent;user-select:none}
+.option:active{transform:scale(.995)}
+.option.selected{border-color:#175cd3;background:#f5f8ff;box-shadow:0 0 0 1px #175cd3 inset}
+.option input{width:22px;height:22px;flex:0 0 22px;margin:1px 0 0;accent-color:#175cd3}
+.letter{font-weight:800;flex:0 0 25px}
+.otext{font-size:16px;overflow-wrap:anywhere;min-width:0}
+.utility{display:flex;gap:8px;margin-top:14px}
+.utility button{min-height:44px;border-radius:10px;border:1px solid #cfd5df;background:#fff;color:#344054;font-weight:700;padding:8px 10px}
+.utility .wide{flex:1}
+.status{font-size:12px;color:#667085;line-height:1.4;margin-top:10px}
+.navigator{display:none;margin-top:12px;padding-top:10px;border-top:1px solid #eaecf0}
+.navigator.open{display:block}
+.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}
+.grid button{min-height:42px;border:1px solid #d0d5dd;border-radius:9px;background:#fff;font-size:13px;font-weight:700}
+.grid button.done{background:#ecfdf3;border-color:#75c995}
+.grid button.current{outline:2px solid #175cd3;outline-offset:1px}
+.bottomNav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(255,255,255,.98);border-top:1px solid #d9dee7;padding:9px max(10px,env(safe-area-inset-left)) calc(9px + env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-right));box-shadow:0 -2px 10px rgba(16,24,40,.08)}
+.bottomInner{max-width:680px;margin:0 auto;display:grid;grid-template-columns:1fr 1.35fr;gap:9px}
+.navbtn{min-height:50px;border-radius:12px;border:1px solid #cfd5df;background:#fff;color:#1d2939;font-size:16px;font-weight:800}
+.navbtn.primary{background:#175cd3;color:#fff;border-color:#175cd3}
+.navbtn:disabled{opacity:.42}
+.hidden{display:none!important}
+.result{margin:12px 10px 24px;background:#fff;border:1px solid #d8dee8;border-radius:16px;padding:18px 14px}
+.result h2{margin:0 0 8px;font-size:22px}
+.score{font-size:42px;font-weight:900;margin:6px 0}
+.resultRow{margin:8px 0;font-size:15px}
+.actionStack button{width:100%;min-height:50px;border-radius:12px;border:1px solid #cfd5df;background:#fff;font-weight:800;margin-top:9px}
+.actionStack button.primary{background:#175cd3;color:#fff;border-color:#175cd3}
+.small{font-size:12px;line-height:1.5;color:#667085}
+@media (min-width:700px){.main{padding:16px 12px 28px}.card{padding:20px}.prompt{font-size:20px}}
+@media (max-width:370px){.brand{font-size:15px}.prompt{font-size:18px}.qtype{font-size:11px}.otext{font-size:15px}}
+
+.startScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 16px;background:#f2f4f7}
+.startCard{width:100%;max-width:560px;background:#fff;border:1px solid #d8dee8;border-radius:18px;padding:22px 18px;box-shadow:0 3px 18px rgba(16,24,40,.08)}
+.startCard h1{margin:0 0 8px;font-size:25px;line-height:1.2}
+.startCard p{font-size:15px;line-height:1.55;color:#475467;margin:8px 0 18px}
+.modeBtn{width:100%;min-height:56px;border-radius:13px;border:1px solid #cfd5df;background:#fff;color:#1d2939;font-size:17px;font-weight:800;margin:7px 0;padding:10px 12px}
+.modeBtn.primary{background:#175cd3;color:#fff;border-color:#175cd3}
+.modeBtn.test{background:#fff7e8;border-color:#f4c76b;color:#6b4b00}
+.modeBtn.resume{background:#ecfdf3;border-color:#75c995;color:#05603a}
+.modeNote{font-size:12px!important;color:#667085!important;margin-top:14px!important}
+.modeBadge{display:inline-block;margin-top:5px;padding:4px 8px;border-radius:999px;font-size:11px;font-weight:800;letter-spacing:.3px}
+.modeBadge.test{background:#fff7e8;color:#8a5a00;border:1px solid #f4c76b}
+.modeBadge.official{background:#ecfdf3;color:#05603a;border:1px solid #75c995}
+</style>
+</head>
+<body>
+<div id="startScreen" class="startScreen">
+  <section class="startCard">
+    <h1>En-Xiang Python V2</h1>
+    <p>Choose a mode. Parent Test and Official Exam use separate saved progress on this device.</p>
+    <button id="parentTestBtn" class="modeBtn test" type="button">Parent Test</button>
+    <button id="newExamBtn" class="modeBtn primary" type="button">Start New Exam</button>
+    <button id="resumeExamBtn" class="modeBtn resume hidden" type="button">Resume Official Exam</button>
+    <p class="modeNote">Parent Test does not write to the official exam record. Start New Exam creates a fresh official attempt on this browser.</p>
+  </section>
+</div>
+<div class="app">
+  <div id="exam" class="hidden">
+    <header class="topbar">
+      <div class="topline"><div class="brand">En-Xiang Python V2<div id="modeBadge" class="modeBadge"></div></div><div id="clock" class="timer">00:00</div></div>
+      <div class="progressText"><span id="progress">Answered 0 / 50</span><span id="position">Q1 / 50</span></div>
+      <div class="track"><div id="bar" class="fill"></div></div>
+    </header>
+    <main class="main">
+      <div id="lineTip" class="lineTip">LINE browser detected. You can answer here. If saving or sharing is blocked, use LINE's menu and choose <b>Open in Safari / default browser</b>.</div>
+      <section class="card">
+        <div id="qbox"></div>
+        <div class="utility"><button id="gridtoggle" class="wide" type="button">Question Navigator</button></div>
+        <div id="navigator" class="navigator"><div id="grid" class="grid"></div></div>
+        <div id="saveStatus" class="status"></div>
+      </section>
+    </main>
+    <nav class="bottomNav" aria-label="Question navigation"><div class="bottomInner"><button id="prev" type="button" class="navbtn">Previous</button><button id="next" type="button" class="navbtn primary">Next</button></div></nav>
+  </div>
+  <div id="result" class="result hidden"></div>
+</div>
+<script>
+(function(){
+var QUESTIONS=[{"topic":"while","type":"single","prompt":"What is the value of x after execution?","options":["5","3","6","7"],"answer":[0],"code":"x = 1\nwhile x < 5:\n    x += 2","note":null},{"topic":"while","type":"single","prompt":"Which statement about a while loop is NOT true?","options":["The condition is checked before each iteration.","The loop always executes at least once.","A break statement can end the loop early.","The loop may execute zero times."],"answer":[1],"code":null,"note":null},{"topic":"while","type":"multi","prompt":"Select all that apply. Which statements can end the loop shown below?","options":["A break statement inside the loop","A return statement when the loop is inside a function","Changing running to False","Calling print() inside the loop"],"answer":[0,1,2],"code":"running = True\nwhile running:\n    # statements","note":null},{"topic":"while","type":"single","prompt":"How many times does the loop body execute?","options":["2","4","3","5"],"answer":[2],"code":"n = 10\nwhile n > 1:\n    n //= 2","note":null},{"topic":"while","type":"multi","prompt":"Select all that apply. Which changes can make this loop eventually stop?","options":["Add i += 1 inside the loop","Change the condition to while i < 0","Replace print(i) with str(i)","Add break inside the loop"],"answer":[0,1,3],"code":"i = 0\nwhile i < 3:\n    print(i)","note":null},{"topic":"String","type":"single","prompt":"What is returned by the expression?","options":["Pyt","ytho","ytho","yth"],"answer":[3],"code":"\"Python\"[1:4]","note":null},{"topic":"String","type":"multi","prompt":"Select all that apply. Which are valid string methods?","options":["lower()","append()","replace()","find()"],"answer":[0,2,3],"code":null,"note":null},{"topic":"String","type":"single","prompt":"What does it mean that Python strings are immutable?","options":["Characters in an existing string object cannot be changed in place.","A string cannot be stored in a variable.","A string cannot contain spaces.","A string can only be read once."],"answer":[0],"code":null,"note":null},{"topic":"String","type":"single","prompt":"What is the output?","options":["AB3","ababab","ab3","ab ab ab"],"answer":[1],"code":"s = 'ab'\nprint(s * 3)","note":null},{"topic":"String","type":"single","prompt":"What is printed after execution?","options":["HELLO","Hello","hello","An error occurs"],"answer":[2],"code":"s = 'hello'\ns.upper()\nprint(s)","note":null},{"topic":"List","type":"single","prompt":"What is the value of nums after execution?","options":["[1, 2, 9, 3]","[9, 1, 2, 3]","[1, 2, 3, 9]","[1, 9, 2, 3]"],"answer":[3],"code":"nums = [1, 2, 3]\nnums.insert(1, 9)","note":null},{"topic":"List","type":"single","prompt":"Which operation is NOT valid for the list nums = [4, 5, 6]?","options":["nums[3]","nums[-1]","nums[0]","nums[1:3]"],"answer":[0],"code":null,"note":null},{"topic":"List","type":"multi","prompt":"Select all that apply. Which operations modify a list in place?","options":["sorted()","extend()","sort()","append()"],"answer":[1,2,3],"code":null,"note":null},{"topic":"List","type":"single","prompt":"What does nums[1:4] return?","options":["[10, 20, 30]","[20, 30, 40]","[20, 30, 40, 50]","[10, 20, 30, 40]"],"answer":[1],"code":"nums = [10, 20, 30, 40, 50]","note":null},{"topic":"List","type":"single","prompt":"What is printed?","options":["[1, 2]","[3]","[1, 2, 3]","An error occurs"],"answer":[2],"code":"a = [1, 2]\nb = a\nb.append(3)\nprint(a)","note":null},{"topic":"Dict","type":"single","prompt":"What is returned by scores[\"Ben\"]?","options":["\"Ben\"","A KeyError","90","80"],"answer":[3],"code":"scores = {'Amy': 90, 'Ben': 80}","note":null},{"topic":"Dict","type":"multi","prompt":"Select all that apply. Which are valid dictionary methods?","options":["keys()","values()","items()","append()"],"answer":[0,1,2],"code":null,"note":null},{"topic":"Dict","type":"single","prompt":"What is the value of d after execution?","options":["{'a': 1, 'b': 2}","{'a': 1}","{'b': 2}","{'a': 2, 'b': 1}"],"answer":[0],"code":"d = {'a': 1}\nd['b'] = 2","note":null},{"topic":"Dict","type":"single","prompt":"Which object is NOT a valid dictionary key?","options":["\"name\"","[1, 2]","(1, 2)","42"],"answer":[1],"code":null,"note":null},{"topic":"Dict","type":"single","prompt":"For a dictionary d, what does the expression x in d test?","options":["Whether x is a key-value pair","Whether x is a value","Whether x is a key","Whether d is empty"],"answer":[2],"code":null,"note":null},{"topic":"sort / sorted","type":"multi","prompt":"Select all that apply. Which statements about sort() and sorted() are valid?","options":["sort() changes a list in place.","sorted() returns a new sorted list.","sorted() works only on lists.","sort() returns None."],"answer":[0,1,3],"code":null,"note":null},{"topic":"sort / sorted","type":"single","prompt":"What is the value of nums after execution?","options":["[1, 2, 3]","[1, 3, 2]","None","[3, 2, 1]"],"answer":[3],"code":"nums = [1, 3, 2]\nnums.sort(reverse=True)","note":null},{"topic":"sort / sorted","type":"multi","prompt":"Select all that apply. Which expressions return a sorted list without changing the original list data?","options":["sorted(data)","data.sort()","list(sorted(data))","sorted(data, reverse=True)"],"answer":[0,2,3],"code":null,"note":null},{"topic":"sort / sorted","type":"single","prompt":"What is the value of result after execution?","options":["None","[3, 2, 1]","[1, 2, 3]","True"],"answer":[0],"code":"nums = [3, 1, 2]\nresult = nums.sort()","note":null},{"topic":"default parameter","type":"multi","prompt":"Select all that apply. Which function definitions are valid Python syntax?","options":["def h(a=1, b):","def g(a=1, b=2):","def f(a, b=2):","def k(a, b, c=3):"],"answer":[1,2,3],"code":null,"note":null},{"topic":"default parameter","type":"single","prompt":"What is returned by greet()?","options":["\"Hi name\"","\"Hi Sam\"","\"Sam\"","An error occurs"],"answer":[1],"code":"def greet(name='Sam'):\n    return 'Hi ' + name","note":null},{"topic":"default parameter","type":"multi","prompt":"Select all that apply. Which calls are valid for this function?","options":["power(3)","power(3, 3)","power(base=3)","power(exp=3)"],"answer":[0,1,2],"code":"def power(base, exp=2):\n    return base ** exp","note":null},{"topic":"docstring","type":"single","prompt":"Where is a function docstring normally placed?","options":["Before the def statement","After the return statement","As the first statement inside the function body","Only at the end of the file"],"answer":[2],"code":null,"note":null},{"topic":"docstring","type":"multi","prompt":"Select all that apply. A useful docstring may describe which information?","options":["What the function does","Its parameters","The computer's battery level","Its return value"],"answer":[0,1,3],"code":null,"note":null},{"topic":"docstring","type":"single","prompt":"Which attribute can be used to read the docstring of a function named calc?","options":["calc.help","calc.doc()","calc.__text__","calc.__doc__"],"answer":[3],"code":null,"note":null},{"topic":"sequential search","type":"multi","prompt":"Select all that apply. Which statements describe a basic sequential search?","options":["It checks items one by one.","It must begin at the middle item.","It can be used on an unsorted list.","It can stop when the target is found."],"answer":[0,2,3],"code":null,"note":null},{"topic":"sequential search","type":"single","prompt":"If a sequential search stops at the first match, what index is returned?","options":["1","0","2","3"],"answer":[0],"code":"data = [5, 8, 8, 2]\ntarget = 8","note":null},{"topic":"sequential search","type":"multi","prompt":"Select all that apply. Which statements are true about a basic sequential search?","options":["It always requires a sorted list.","It may need to check every item.","It can search an unsorted list.","It can stop as soon as a match is found."],"answer":[1,2,3],"code":null,"note":null},{"topic":"sequential search","type":"single","prompt":"Why is the function below incorrect for many searches?","options":["The loop variable must be a string.","It returns -1 after checking only the first non-matching item.","range() cannot be used with len().","A function cannot return an index."],"answer":[1],"code":"def find_item(data, target):\n    for i in range(len(data)):\n        if data[i] == target:\n            return i\n        return -1","note":null},{"topic":"sequential search","type":"single","prompt":"In the worst case, how many comparisons may a sequential search make in a list of n items?","options":["1","log n","n","n / 2 exactly"],"answer":[2],"code":null,"note":null},{"topic":"file mode","type":"multi","prompt":"Select all that apply. Which statements about file mode \"r\" are valid?","options":["It opens a file for reading.","The file normally needs to already exist.","It does not normally erase the file contents.","It appends new text at the end."],"answer":[0,1,2],"code":null,"note":null},{"topic":"file mode","type":"single","prompt":"What is a key effect of opening an existing file with mode \"w\"?","options":["Old contents are kept and new text is added at the end.","The file must already be empty.","The file becomes read-only.","Old contents are replaced when the file is opened for writing."],"answer":[3],"code":null,"note":null},{"topic":"file mode","type":"single","prompt":"Which mode should be used to add new text at the end without deleting existing contents?","options":["\"a\"","\"w\"","\"r\"","\"x\""],"answer":[0],"code":null,"note":null},{"topic":"file mode","type":"multi","prompt":"Select all that apply. Considering only modes \"r\", \"w\", and \"a\", which modes allow writing?","options":["\"w\"","\"r\"","\"a\"","None of them"],"answer":[0,2],"code":null,"note":null},{"topic":"file mode","type":"multi","prompt":"Select all that apply. Which statements are valid?","options":["\"r\" usually requires the file to already exist.","\"w\" can create a file if it does not exist.","\"r\" automatically deletes old contents.","\"a\" writes new data at the end of the file."],"answer":[0,1,3],"code":null,"note":null},{"topic":"try / except","type":"single","prompt":"What is the main purpose of an except block?","options":["To repeat the try block forever","To handle a matching exception","To sort exception messages","To close every file automatically"],"answer":[1],"code":null,"note":null},{"topic":"try / except","type":"multi","prompt":"Select all that apply. Which statements about the else block in try/except/else are valid?","options":["It runs when no exception occurs in the try block.","It is required in every try/except statement.","It does not run when an exception from try is handled by except.","It comes after the except block(s)."],"answer":[0,2,3],"code":null,"note":null},{"topic":"try / except","type":"single","prompt":"Which statement about finally is valid?","options":["It runs only when there is no exception.","It runs only when there is an exception.","It normally runs whether or not an exception occurs.","It replaces the except block."],"answer":[2],"code":null,"note":null},{"topic":"try / except","type":"single","prompt":"What is the output order after execution?","options":["D, A, C","A, C","A, D, C","A, B, C"],"answer":[3],"code":"try:\n    print('A')\nexcept ValueError:\n    print('D')\nelse:\n    print('B')\nfinally:\n    print('C')","note":null},{"topic":"try / except","type":"multi","prompt":"Select all that apply. Which statements are valid?","options":["An except block always runs.","A try/except statement may also have an else block.","A finally block is commonly used for cleanup.","A try block can have an except block."],"answer":[1,2,3],"code":null,"note":null},{"topic":"try / except","type":"single","prompt":"Which statement is NOT true?","options":["finally is skipped whenever an exception occurs.","else runs when the try block finishes without an exception.","A matching except block can prevent a program from stopping on a handled exception.","Different except blocks can handle different exception types."],"answer":[0],"code":null,"note":null},{"topic":"return","type":"multi","prompt":"Select all that apply. Which statements about return are valid?","options":["It ends the current function call.","It can send a value back to the caller.","It can appear inside an if statement in a function.","It automatically prints the returned value."],"answer":[0,1,2],"code":null,"note":null},{"topic":"mixed","type":"multi","prompt":"Select all that apply. Which statements are valid after execution?","options":["nums becomes [1, 2, 3]","ordered becomes [1, 2, 3]","nums and ordered refer to the same list object","sorted() leaves nums unchanged"],"answer":[0,1,3],"code":"nums = [3, 1, 2]\nordered = sorted(nums)","note":null},{"topic":"mixed","type":"single","prompt":"What is returned by check([4, 7, 9], 7)?","options":["False","True","1","7"],"answer":[1],"code":"def check(data, target):\n    for item in data:\n        if item == target:\n            return True\n    return False","note":null},{"topic":"mixed","type":"multi","prompt":"Select all that apply. Which expressions are valid for the objects shown?","options":["name.lower()","name.append(\"!\")","info.get(\"age\")","nums.append(4)"],"answer":[0,2,3],"code":"name = 'Amy'\nnums = [1, 2, 3]\ninfo = {'age': 13}","note":null}];
+var VERSION='ENXIANG_PY_V2_MOBILE_20260927';
+var OFFICIAL_KEY='enxiang_python_v2_official_state';
+var TEST_KEY='enxiang_python_v2_parent_test_state';
+var KEY='';
+var MODE='';
+var timerHandle=null;
+var letters=['A','B','C','D'];
+var canStore=true;
+var state={version:VERSION,index:0,answers:{},times:{},startedAt:(new Date()).getTime(),lastAt:(new Date()).getTime(),submitted:false};
+function byId(id){return document.getElementById(id);}
+function now(){return (new Date()).getTime();}
+function escapeHtml(v){return String(v).replace(/[&<>"']/g,function(c){var map={'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'};return map[c];});}
+function arrCopy(a){var out=[],i;for(i=0;i<a.length;i++)out.push(a[i]);return out;}
+function sortNums(a){a.sort(function(x,y){return x-y;});return a;}
+function sameArray(a,b){if(a.length!==b.length)return false;for(var i=0;i<a.length;i++)if(a[i]!==b[i])return false;return true;}
+function totalSavedTime(){var t=0,k;for(k in state.times)if(state.times.hasOwnProperty(k))t+=Number(state.times[k]||0);return t;}
+function totalTimeLive(){return totalSavedTime()+(now()-state.lastAt);}
+function fmt(ms){var s=Math.floor(ms/1000),m=Math.floor(s/60);s=s%60;return (m<10?'0':'')+m+':'+(s<10?'0':'')+s;}
+function answeredCount(){var n=0,i,a;for(i=0;i<QUESTIONS.length;i++){a=state.answers[String(i)];if(a&&a.length)n++;}return n;}
+function addCurrentTime(){var n=now(),k=String(state.index);if(!state.times[k])state.times[k]=0;state.times[k]+=Math.max(0,n-state.lastAt);state.lastAt=n;}
+function storageSet(){try{window.localStorage.setItem(KEY,JSON.stringify(state));canStore=true;}catch(e){canStore=false;}}
+function storageLoad(){try{var raw=window.localStorage.getItem(KEY);if(raw){var x=JSON.parse(raw);if(x&&x.version===VERSION&&!x.submitted){state=x;state.lastAt=now();}}canStore=true;}catch(e){canStore=false;}}
+function storageClear(){try{window.localStorage.removeItem(KEY);}catch(e){}}
+function save(){storageSet();byId('saveStatus').innerHTML=canStore?'Progress saved on this browser.':'Autosave is blocked in this viewer. Keep this page open until submission.';}
+function selectedFor(i){var a=state.answers[String(i)];return a?arrCopy(a):[];}
+function hasClass(el,n){return (' '+el.className+' ').indexOf(' '+n+' ')>=0;}
+function setClass(el,n,on){var c=' '+el.className+' ';var has=c.indexOf(' '+n+' ')>=0;if(on&&!has)el.className+=(el.className?' ':'')+n;if(!on&&has)el.className=c.replace(' '+n+' ',' ').replace(/^\s+|\s+$/g,'');}
+function render(){
+ var q=QUESTIONS[state.index],a=selectedFor(state.index),h='',i,inputType,checked;
+ h+='<div class="qhead"><div class="qnum">Question '+(state.index+1)+'</div><div class="qtype">'+(q.type==='multi'?'Select all that apply':'Choose one answer')+'</div></div>';
+ h+='<div class="prompt">'+escapeHtml(q.prompt)+'</div>';
+ if(q.code)h+='<div class="code">'+escapeHtml(q.code)+'</div>';
+ h+='<div class="options">';inputType=(q.type==='multi')?'checkbox':'radio';
+ for(i=0;i<q.options.length;i++){checked=a.indexOf(i)>=0;h+='<label class="option'+(checked?' selected':'')+'"><input type="'+inputType+'" name="ans" value="'+i+'"'+(checked?' checked="checked"':'')+'><span class="letter">'+letters[i]+'.</span><span class="otext">'+escapeHtml(q.options[i])+'</span></label>';}
+ h+='</div>';byId('qbox').innerHTML=h;
+ var inputs=document.getElementsByName('ans');for(i=0;i<inputs.length;i++)inputs[i].onchange=answerChanged;
+ byId('prev').disabled=(state.index===0);byId('next').innerHTML=(state.index===QUESTIONS.length-1)?'Submit Exam':'Next';
+ byId('progress').innerHTML='Answered '+answeredCount()+' / '+QUESTIONS.length;byId('position').innerHTML='Q'+(state.index+1)+' / '+QUESTIONS.length;byId('bar').style.width=Math.round((state.index+1)*100/QUESTIONS.length)+'%';renderGrid();updateClock();
+}
+function answerChanged(){
+ var inputs=document.getElementsByName('ans'),vals=[],i,labels=document.getElementsByClassName('option');
+ for(i=0;i<inputs.length;i++)if(inputs[i].checked)vals.push(Number(inputs[i].value));sortNums(vals);state.answers[String(state.index)]=vals;
+ for(i=0;i<inputs.length;i++)setClass(labels[i],'selected',inputs[i].checked);byId('progress').innerHTML='Answered '+answeredCount()+' / '+QUESTIONS.length;renderGrid();save();
+}
+function renderGrid(){var h='',i,a;for(i=0;i<QUESTIONS.length;i++){a=selectedFor(i);h+='<button type="button" data-q="'+i+'" class="'+(a.length?'done ':'')+(i===state.index?'current':'')+'">'+(i+1)+'</button>';}byId('grid').innerHTML=h;var bs=byId('grid').getElementsByTagName('button');for(i=0;i<bs.length;i++)bs[i].onclick=function(){move(Number(this.getAttribute('data-q')));};}
+function move(i){addCurrentTime();state.index=Math.max(0,Math.min(QUESTIONS.length-1,i));save();render();try{window.scrollTo(0,0);}catch(e){}}
+function toggleGrid(){var n=byId('navigator');if(hasClass(n,'open')){setClass(n,'open',false);byId('gridtoggle').innerHTML='Question Navigator';}else{setClass(n,'open',true);byId('gridtoggle').innerHTML='Hide Navigator';}}
+function updateClock(){if(!state.submitted)byId('clock').innerHTML=fmt(totalTimeLive());}
+function scoreExam(){var score=0,i,a,b;for(i=0;i<QUESTIONS.length;i++){a=sortNums(selectedFor(i));b=sortNums(arrCopy(QUESTIONS[i].answer));if(sameArray(a,b))score++;}return score;}
+function topicStats(){var x={},i,q,a,b,ok,t;for(i=0;i<QUESTIONS.length;i++){q=QUESTIONS[i];t=q.topic;if(!x[t])x[t]={right:0,total:0};x[t].total++;a=sortNums(selectedFor(i));b=sortNums(arrCopy(q.answer));ok=sameArray(a,b);if(ok)x[t].right++;}return x;}
+function answerLetters(a){if(!a||!a.length)return '(blank)';var out=[],i;for(i=0;i<a.length;i++)out.push(letters[a[i]]);return out.join(',');}
+function makeTxt(){var lines=[],score=scoreExam(),i,q,a,b,ok,stats=topicStats(),k,total=totalSavedTime();lines.push('En-Xiang Python V2 - Result');lines.push('Version: '+VERSION);lines.push('Mode: '+(MODE==='test'?'PARENT TEST':'OFFICIAL EXAM'));lines.push('Submitted: '+(new Date()).toLocaleString());lines.push('Score: '+score+' / '+QUESTIONS.length+' ('+Math.round(score*100/QUESTIONS.length)+'%)');lines.push('Total active answer time: '+fmt(total));lines.push('Answered: '+answeredCount()+' / '+QUESTIONS.length);lines.push('');lines.push('TOPIC SUMMARY');for(k in stats)if(stats.hasOwnProperty(k))lines.push(k+': '+stats[k].right+'/'+stats[k].total+' ('+Math.round(stats[k].right*100/stats[k].total)+'%)');lines.push('');lines.push('QUESTION DETAIL');for(i=0;i<QUESTIONS.length;i++){q=QUESTIONS[i];a=sortNums(selectedFor(i));b=sortNums(arrCopy(q.answer));ok=sameArray(a,b);lines.push('Q'+(i+1)+' | '+q.topic+' | '+(q.type==='multi'?'MULTI':'SINGLE')+' | '+(ok?'CORRECT':'WRONG')+' | Time '+fmt(state.times[String(i)]||0));lines.push('Prompt: '+q.prompt.replace(/\s+/g,' '));lines.push('Student: '+answerLetters(a)+' | Correct: '+answerLetters(b));lines.push('');}return lines.join('\r\n');}
+function copyResult(){var ta=document.createElement('textarea');ta.value=makeTxt();ta.style.position='fixed';ta.style.left='-9999px';document.body.appendChild(ta);ta.focus();ta.select();try{document.execCommand('copy');alert('Result copied. Paste it into LINE.');}catch(e){alert('Copy is not supported here. Try Open in Safari / default browser.');}document.body.removeChild(ta);}
+function downloadTxt(){var txt=makeTxt();try{var blob=new Blob([txt],{type:'text/plain;charset=utf-8'});var url=(window.URL||window.webkitURL).createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='EnXiang_Python_V2_Result.txt';document.body.appendChild(a);a.click();setTimeout(function(){try{document.body.removeChild(a);(window.URL||window.webkitURL).revokeObjectURL(url);}catch(e){}},500);}catch(e){copyResult();}}
+function shareResult(){var txt=makeTxt();if(navigator.share){try{var p=navigator.share({title:'En-Xiang Python V2 Result',text:txt});if(p&&p.catch)p.catch(function(){copyResult();});return;}catch(e){}}copyResult();}
+function showResult(){var score=scoreExam(),stats=topicStats(),h='<h2>Exam Submitted</h2><div class="resultRow"><b>Mode: '+(MODE==='test'?'PARENT TEST':'OFFICIAL EXAM')+'</b></div><div class="score">'+score+' / '+QUESTIONS.length+'</div><div class="resultRow">Score: '+Math.round(score*100/QUESTIONS.length)+'%</div><div class="resultRow">Active answer time: '+fmt(totalSavedTime())+'</div><h3>Topic Summary</h3>',k;for(k in stats)if(stats.hasOwnProperty(k))h+='<div class="resultRow">'+escapeHtml(k)+': <b>'+stats[k].right+'/'+stats[k].total+'</b></div>';h+='<div class="actionStack"><button type="button" class="primary" id="shareBtn">Share / Send to LINE</button><button type="button" id="copyBtn">Copy Result Text</button><button type="button" id="downloadBtn">Download TXT Result</button><button type="button" id="restartBtn">Restart Exam</button></div><p class="small">The TXT includes each response, correct answer, correctness, topic, and per-question time.</p>';byId('exam').className='hidden';byId('result').className='result';byId('result').innerHTML=h;byId('shareBtn').onclick=shareResult;byId('copyBtn').onclick=copyResult;byId('downloadBtn').onclick=downloadTxt;byId('restartBtn').onclick=restart;try{window.scrollTo(0,0);}catch(e){}}
+function submitExam(){var missing=QUESTIONS.length-answeredCount();if(missing>0){if(!window.confirm('You still have '+missing+' unanswered question(s). Submit anyway?'))return;}else if(!window.confirm('Submit the exam now?'))return;addCurrentTime();state.submitted=true;storageSet();showResult();}
+function freshState(){return {version:VERSION,index:0,answers:{},times:{},startedAt:now(),lastAt:now(),submitted:false,mode:MODE};}
+function restart(){if(!window.confirm('Erase this attempt and restart from Question 1?'))return;storageClear();state=freshState();byId('exam').className='';byId('result').className='result hidden';save();render();}
+function detectLine(){var ua=navigator.userAgent||'';if(/Line\//i.test(ua)||/LIFF/i.test(ua))byId('lineTip').style.display='block';}
+function savedOfficialExists(){try{var raw=window.localStorage.getItem(OFFICIAL_KEY);if(!raw)return false;var x=JSON.parse(raw);return !!(x&&x.version===VERSION&&!x.submitted);}catch(e){return false;}}
+function showMode(){var b=byId('modeBadge');if(MODE==='test'){b.className='modeBadge test';b.innerHTML='PARENT TEST';}else{b.className='modeBadge official';b.innerHTML='OFFICIAL EXAM';}}
+function beginMode(mode,resume){MODE=mode;KEY=(mode==='test'?TEST_KEY:OFFICIAL_KEY);state=freshState();if(resume)storageLoad();else{storageClear();state=freshState();storageSet();}byId('startScreen').className='hidden';byId('exam').className='';byId('result').className='result hidden';showMode();detectLine();render();save();if(!timerHandle)timerHandle=setInterval(updateClock,500);try{window.scrollTo(0,0);}catch(e){}}
+function init(){byId('parentTestBtn').onclick=function(){beginMode('test',false);};byId('newExamBtn').onclick=function(){if(savedOfficialExists()&&!window.confirm('Start a new official exam and erase the saved official progress on this device?'))return;beginMode('official',false);};byId('resumeExamBtn').onclick=function(){beginMode('official',true);};if(savedOfficialExists())byId('resumeExamBtn').className='modeBtn resume';byId('prev').onclick=function(){move(state.index-1);};byId('next').onclick=function(){if(state.index===QUESTIONS.length-1)submitExam();else move(state.index+1);};byId('gridtoggle').onclick=toggleGrid;}
+if(document.addEventListener){document.addEventListener('visibilitychange',function(){if(!MODE)return;if(document.hidden){addCurrentTime();save();}else state.lastAt=now();});window.addEventListener('pagehide',function(){if(MODE&&!state.submitted){addCurrentTime();save();}});}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();
+</script>
+</body>
+</html>
