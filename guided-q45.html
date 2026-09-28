@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>恩翔 Python Q45｜Guided Correction</title>
+<style>
+:root{--bg:#f3f5f8;--card:#fff;--ink:#162033;--muted:#667085;--line:#d7dde7;--blue:#175cd3}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC","Microsoft JhengHei",sans-serif;background:var(--bg);color:var(--ink)}
+body{padding-bottom:28px}.wrap{max-width:720px;margin:0 auto;padding:14px 10px 28px}
+.top,.card,.result{background:#fff;border:1px solid var(--line);border-radius:17px;box-shadow:0 1px 3px rgba(16,24,40,.05)}
+.top{padding:16px;margin-bottom:12px}.badge{display:inline-block;font-size:12px;font-weight:800;padding:5px 9px;border-radius:999px;background:#eef4ff;color:#1849a9}
+h1{font-size:23px;margin:8px 0 5px}.sub,.small{font-size:13px;color:var(--muted);line-height:1.55}
+.track{height:7px;background:#e5e7eb;border-radius:999px;overflow:hidden;margin-top:12px}.fill{height:100%;width:4%;background:var(--blue);transition:.25s}.status{font-size:12px;color:var(--muted);margin-top:7px}
+.card{padding:16px 14px}.step{font-size:13px;font-weight:800;color:#475467;margin-bottom:8px}.prompt{font-size:18px;line-height:1.55;font-weight:760;margin:6px 0 12px}
+.option,.unknown,.primary,.secondary{width:100%;min-height:52px;border-radius:13px;padding:12px 13px;margin:8px 0;font-size:16px;line-height:1.4;text-align:left}
+.option{border:1.5px solid #cfd5df;background:#fff}.unknown{border:1.5px dashed #98a2b3;background:#f8fafc;color:#475467}
+.primary{border:1px solid var(--blue);background:var(--blue);color:#fff;font-weight:800;text-align:center}.secondary{border:1px solid #cfd5df;background:#fff;font-weight:800;text-align:center}
+.fb{border-left:5px solid #f4b740;border-radius:11px;background:#fff8e8;padding:12px 13px;line-height:1.55;margin:8px 0 12px}.fb.good{border-left-color:#12b76a;background:#ecfdf3}.fb.bad{border-left-color:#f04438;background:#fff1f0}
+.formula{background:#f8fafc;border:1px solid #e4e7ec;border-radius:12px;padding:12px;text-align:center;font-weight:800;margin:10px 0}
+.result{padding:16px 14px;margin-top:12px}.hidden{display:none!important}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:10px 0}.kpi{border:1px solid var(--line);border-radius:12px;padding:11px}.kpi b{display:block;font-size:17px;margin-top:3px}
+pre.log{white-space:pre-wrap;background:#f8fafc;border:1px solid #e4e7ec;border-radius:12px;padding:11px;font-size:12px;line-height:1.45;max-height:260px;overflow:auto}
+@media(max-width:520px){.grid{grid-template-columns:1fr}.prompt{font-size:17px}.wrap{padding:10px 8px 24px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="top">
+  <span class="badge">原 V2 Q45｜複選＋try/except 整合</span>
+  <h1>恩翔 Python｜Guided Correction</h1>
+  <div class="sub">這一題同時檢查兩件事：try/except 概念，以及複選題能不能把 A、B、C、D 四個選項逐一判斷完。</div>
+  <div class="track"><div id="fill" class="fill"></div></div>
+  <div id="status" class="status">準備開始</div>
+</div>
+<section id="stage" class="card"></section>
+<section id="result" class="result hidden"></section>
+</div>
+
+<script>
+(function(){
+var state={route:[],levels:{reading:-1,A:-1,B:-1,C:-1,D:-1,final:-1,transfer:-1},judgments:{},stopped:false};
+var stage=document.getElementById('stage'),result=document.getElementById('result'),fill=document.getElementById('fill'),status=document.getElementById('status');
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function setP(p,t){fill.style.width=p+'%';status.textContent=t;}
+function opt(t,v){return '<button class="option" data-v="'+esc(v)+'">'+t+'</button>';}
+function unk(){return '<button class="unknown" data-v="__U__">我不懂／我不知道怎麼判斷</button>';}
+function mount(h,fn){stage.innerHTML=h;var b=stage.querySelectorAll('button[data-v]');for(var i=0;i<b.length;i++)b[i].onclick=function(){fn(this.getAttribute('data-v'));};}
+function log(s,a,n){state.route.push({step:s,answer:a,note:n||''});}
+function stop(s){log(s,'NOT_UNDERSTOOD');state.stopped=true;stage.classList.add('hidden');showResult('stopped');}
+function originalPrompt(){
+return '<div class="prompt">Select all that apply. Which statements are valid?</div>'+
+'<div class="small">A. An except block always runs.<br>B. A try/except statement may also have an else block.<br>C. A finally block is commonly used for cleanup.<br>D. A try block can have an except block.</div>';
+}
+
+function reading(){
+setP(8,'第 1 關｜複選題讀法');
+mount(
+'<div class="step">第 1 關｜先不要急著勾答案</div>'+originalPrompt()+
+'<div class="prompt">看到「Select all that apply」，最安全的作法是哪一個？</div>'+
+opt('A. A、B、C、D 每一個都各自判斷 True / False，再組成答案','A')+
+opt('B. 找到一個看起來最對的就送出','B')+
+opt('C. 猜通常會有兩個答案','C')+
+unk(),
+function(v){if(v==='__U__')return stop('reading');log('reading',v);if(v==='A'){state.levels.reading=0;gateA();}else{state.levels.reading=1;readingHint();}});
+}
+function readingHint(){
+setP(11,'第 1 關｜提示');
+mount('<div class="fb bad">複選題最容易不是「完全不會」，而是漏掉一個。固定策略：<b>四個選項全部逐一判斷。</b></div>'+
+'<div class="prompt">所以要不要把每個選項都當成獨立的 True / False 題？</div>'+
+opt('A. 要','Y')+opt('B. 不用','N')+unk(),
+function(v){if(v==='__U__')return stop('reading_hint');log('reading_hint',v);if(v==='Y')gateA();else readingMini();});
+}
+function readingMini(){
+state.levels.reading=2;setP(13,'第 1 關｜微教學');
+mount('<div class="formula">複選題＝A 判一次＋B 判一次＋C 判一次＋D 判一次</div>'+
+'<div class="prompt">完成四次判斷後，才把所有 True 的選項一起勾起來。這樣做對嗎？</div>'+
+opt('A. 對','Y')+opt('B. 不對','N')+unk(),
+function(v){if(v==='__U__')return stop('reading_mini');log('reading_mini',v);if(v==='Y')gateA();else readingMini();});
+}
+
+function gateA(){
+setP(25,'第 2 關｜判斷 A');
+mount('<div class="step">A｜只判斷這一句</div>'+
+'<div class="prompt">“An except block always runs.”<br><br>意思：except 區塊「一定每次都會執行」。這句是 True 還是 False？</div>'+
+opt('A. True','T')+opt('B. False','F')+unk(),
+function(v){if(v==='__U__')return stop('A');log('A_first',v);state.judgments.A=v;if(v==='F'){state.levels.A=0;gateB();}else{state.levels.A=1;AHint();}});
+}
+function AHint(){
+setP(28,'A｜提示');
+mount('<div class="fb bad">except 只有在 try 發生「符合的例外」時才會進去，不是每次都跑。</div>'+
+'<div class="prompt">如果 try 完全沒有例外，except 會執行嗎？</div>'+
+opt('A. 不會','N')+opt('B. 會','Y')+unk(),
+function(v){if(v==='__U__')return stop('A_hint');log('A_hint',v);if(v==='N'){state.judgments.A='F';gateB();}else AMini();});
+}
+function AMini(){
+state.levels.A=2;setP(30,'A｜微教學');
+mount('<div class="formula">try 無例外 → except 跳過<br>try 有 matching exception → matching except 才執行</div>'+
+'<div class="prompt">所以「except always runs」是？</div>'+
+opt('A. False','F')+opt('B. True','T')+unk(),
+function(v){if(v==='__U__')return stop('A_mini');log('A_mini',v);if(v==='F'){state.judgments.A='F';gateB();}else AMini();});
+}
+
+function gateB(){
+setP(40,'第 3 關｜判斷 B');
+mount('<div class="step">B｜只判斷這一句</div>'+
+'<div class="prompt">“A try/except statement may also have an else block.”<br><br>try/except 結構「可以另外有 else」。True 還是 False？</div>'+
+opt('A. True','T')+opt('B. False','F')+unk(),
+function(v){if(v==='__U__')return stop('B');log('B_first',v);state.judgments.B=v;if(v==='T'){state.levels.B=0;gateC();}else{state.levels.B=1;BHint();}});
+}
+function BHint(){
+setP(43,'B｜提示');
+mount('<div class="fb bad">你剛才 Q44 已經實際跑過 <code>try / except / else / finally</code> 這個合法結構。</div>'+
+'<div class="prompt">因此 try/except 後面能不能有 else？</div>'+
+opt('A. 可以','Y')+opt('B. 不可以','N')+unk(),
+function(v){if(v==='__U__')return stop('B_hint');log('B_hint',v);if(v==='Y'){state.judgments.B='T';gateC();}else BMini();});
+}
+function BMini(){
+state.levels.B=2;setP(45,'B｜微教學');
+mount('<div class="formula">try → except → else → finally<br>這是一種合法的 Python 結構</div>'+
+'<div class="prompt">所以 B 是？</div>'+
+opt('A. True','T')+opt('B. False','F')+unk(),
+function(v){if(v==='__U__')return stop('B_mini');log('B_mini',v);if(v==='T'){state.judgments.B='T';gateC();}else BMini();});
+}
+
+function gateC(){
+setP(55,'第 4 關｜判斷 C');
+mount('<div class="step">C｜只判斷這一句</div>'+
+'<div class="prompt">“A finally block is commonly used for cleanup.”<br><br>finally 常拿來做收尾／清理工作。True 還是 False？</div>'+
+opt('A. True','T')+opt('B. False','F')+unk(),
+function(v){if(v==='__U__')return stop('C');log('C_first',v);state.judgments.C=v;if(v==='T'){state.levels.C=0;gateD();}else{state.levels.C=1;CHint();}});
+}
+function CHint(){
+setP(58,'C｜提示');
+mount('<div class="fb bad">finally 通常不論前面是否有例外都會執行，所以很適合拿來做「最後一定要做的收尾」。</div>'+
+'<div class="prompt">例如關閉資源、做 cleanup，適不適合放 finally？</div>'+
+opt('A. 適合','Y')+opt('B. 不適合','N')+unk(),
+function(v){if(v==='__U__')return stop('C_hint');log('C_hint',v);if(v==='Y'){state.judgments.C='T';gateD();}else CMini();});
+}
+function CMini(){
+state.levels.C=2;setP(60,'C｜微教學');
+mount('<div class="formula">finally = 常用來做「最後一定要處理」的 cleanup</div>'+
+'<div class="prompt">所以 C 是？</div>'+
+opt('A. True','T')+opt('B. False','F')+unk(),
+function(v){if(v==='__U__')return stop('C_mini');log('C_mini',v);if(v==='T'){state.judgments.C='T';gateD();}else CMini();});
+}
+
+function gateD(){
+setP(70,'第 5 關｜判斷 D');
+mount('<div class="step">D｜只判斷這一句</div>'+
+'<div class="prompt">“A try block can have an except block.”<br><br>try 區塊可以搭配 except 區塊。True 還是 False？</div>'+
+opt('A. True','T')+opt('B. False','F')+unk(),
+function(v){if(v==='__U__')return stop('D');log('D_first',v);state.judgments.D=v;if(v==='T'){state.levels.D=0;finalCheck();}else{state.levels.D=1;DHint();}});
+}
+function DHint(){
+setP(73,'D｜提示');
+mount('<div class="fb bad">try/except 本身就是 Python 用來處理例外的基本結構。</div>'+
+'<div class="prompt">因此 try 能不能搭配 except？</div>'+
+opt('A. 能','Y')+opt('B. 不能','N')+unk(),
+function(v){if(v==='__U__')return stop('D_hint');log('D_hint',v);if(v==='Y'){state.judgments.D='T';finalCheck();}else DMini();});
+}
+function DMini(){
+state.levels.D=2;setP(75,'D｜微教學');
+mount('<div class="formula">try → 嘗試執行<br>except → 處理 matching exception</div>'+
+'<div class="prompt">所以 D 是？</div>'+
+opt('A. True','T')+opt('B. False','F')+unk(),
+function(v){if(v==='__U__')return stop('D_mini');log('D_mini',v);if(v==='T'){state.judgments.D='T';finalCheck();}else DMini();});
+}
+
+function finalCheck(){
+setP(84,'第 6 關｜把四個判斷組起來');
+mount('<div class="step">第 6 關｜現在才組成複選答案</div>'+originalPrompt()+
+'<div class="small">你剛才已經把 A、B、C、D 各自判斷過一次。現在選出「所有 True」的選項。</div>'+
+opt('A. A','A')+opt('B. B、C、D','BCD')+opt('C. A、B、C、D','ABCD')+opt('D. C、D','CD')+unk(),
+function(v){if(v==='__U__')return stop('final');log('final',v);if(v==='BCD'){state.levels.final=0;transfer();}else{state.levels.final=1;finalRepair(v);}});
+}
+function finalRepair(v){
+var msg='請不要重新猜組合。回到四個獨立判斷：A=False；B=True；C=True；D=True。';
+mount('<div class="fb bad">'+msg+'</div>'+
+'<div class="formula">複選不是找「最像答案」<br>而是把所有 True 一起選出來</div>'+
+'<button id="again" class="primary">重新組一次答案</button>'+unk(),
+function(x){if(x==='__U__')stop('final_repair');});
+document.getElementById('again').onclick=finalCheck;
+}
+
+function transfer(){
+setP(93,'第 7 關｜換題驗證');
+mount('<div class="step">第 7 關｜新題，不背原答案</div>'+
+'<div class="prompt">Select all that apply. Which statements are valid?</div>'+
+'<div class="small">A. finally is skipped whenever an exception occurs.<br>B. else runs when the try block finishes without an exception.<br>C. A matching except block can handle a matching exception.<br>D. Different except blocks can handle different exception types.</div>'+
+'<div class="prompt">請先在心裡把 A、B、C、D 各判一次，再選組合。</div>'+
+opt('A. A、B','AB')+opt('B. B、C、D','BCD')+opt('C. A、C、D','ACD')+opt('D. A、B、C、D','ABCD')+unk(),
+function(v){if(v==='__U__')return stop('transfer');log('transfer',v);if(v==='BCD'){state.levels.transfer=0;showResult('mastered');}else{state.levels.transfer=1;transferRepair(v);}});
+}
+function transferRepair(v){
+var msg='';
+if(v.indexOf('A')>=0)msg+='A 不正確：finally 並不是「發生例外就跳過」。 ';
+if(v.indexOf('B')<0)msg+='B 正確：try 沒有例外時會進 else。 ';
+if(v.indexOf('C')<0)msg+='C 正確：matching except 可處理 matching exception。 ';
+if(v.indexOf('D')<0)msg+='D 正確：不同 except 可以處理不同例外類型。 ';
+mount('<div class="fb bad">'+msg+'</div>'+
+'<div class="formula">仍然用同一策略：A、B、C、D 每個各判一次</div>'+
+'<button id="retry" class="primary">再做一次新題</button>'+unk(),
+function(x){if(x==='__U__')stop('transfer_repair');});
+document.getElementById('retry').onclick=transfer;
+}
+
+function levelText(n){return n===-1?'未進行':(n===0?'首次通過':(n===1?'提示後通過':'Mini Lesson 後通過'));}
+function diagnosis(){
+if(state.stopped){var last=state.route[state.route.length-1];return '學生在「'+last.step+'」選擇不懂，本題標記為 Needs Reteaching。';}
+var w=[];if(state.levels.reading>0)w.push('複選題逐項判斷策略');if(state.levels.A>0)w.push('except 並非每次都執行');if(state.levels.B>0)w.push('try/except 可搭配 else');if(state.levels.C>0)w.push('finally 與 cleanup');if(state.levels.D>0)w.push('try/except 基本結構');if(state.levels.final>0)w.push('把四個獨立判斷整合成複選答案');if(state.levels.transfer>0)w.push('換題後的概念轉移');
+return w.length?'本次需要補強：'+w.join('、')+'。':'核心概念與複選逐項判斷都可直接完成。';
+}
+function routeText(){var a=[];for(var i=0;i<state.route.length;i++){var r=state.route[i];a.push((i+1)+'. '+r.step+' → '+r.answer);}return a.join('\n');}
+function resultText(kind){
+var L=['En-Xiang Python Q45 Guided Correction - Result','Version: GUIDED_Q45_MULTI_20260928_V1','Status: '+(kind==='stopped'?'NOT UNDERSTOOD / STOPPED':'GUIDED CORRECTION COMPLETED'),'','DIAGNOSIS',diagnosis(),'','GATE SUMMARY','複選題讀法: '+levelText(state.levels.reading),'A except always runs: '+levelText(state.levels.A),'B try/except + else: '+levelText(state.levels.B),'C finally cleanup: '+levelText(state.levels.C),'D try + except: '+levelText(state.levels.D)];
+if(!state.stopped){L.push('原題整合: '+(state.levels.final===0?'PASS':'needed repair'));L.push('換題驗證: '+(state.levels.transfer===0?'PASS':'needed repair'));}
+L.push('','ANSWER PATH',routeText());return L.join('\r\n');
+}
+function fallbackCopy(t){var ta=document.createElement('textarea');ta.value=t;ta.style.position='fixed';ta.style.left='-9999px';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');alert('已複製');}catch(e){}ta.remove();}
+function copyR(k){var t=resultText(k);if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(function(){alert('已複製');},function(){fallbackCopy(t);});}else fallbackCopy(t);}
+function downR(k){var t=resultText(k),b=new Blob([t],{type:'text/plain;charset=utf-8'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download='EnXiang_Python_Q45_GuidedCorrection_Result.txt';document.body.appendChild(a);a.click();setTimeout(function(){a.remove();URL.revokeObjectURL(u);},500);}
+function shareR(k){var t=resultText(k),f=null;try{f=new File([t],'EnXiang_Python_Q45_GuidedCorrection_Result.txt',{type:'text/plain'});}catch(e){}if(navigator.share){try{if(f&&navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({title:'恩翔 Python Q45 訂正結果',files:[f],text:'Q45 Guided Correction 完成'});return;}navigator.share({title:'恩翔 Python Q45 訂正結果',text:t});return;}catch(e){}}copyR(k);}
+function showResult(kind){
+setP(100,'完成');stage.classList.add('hidden');result.classList.remove('hidden');
+var box=kind==='stopped'?'<div class="fb">選擇「不懂」，本題停止，不硬逼答。</div>':'<div class="fb good"><b>換題驗證通過。</b> 已同時檢查 try/except 概念與複選逐項判斷。</div>';
+result.innerHTML='<h2>Q45 Guided Correction 完成</h2>'+box+'<div class="fb"><b>診斷：</b><br>'+diagnosis()+'</div><pre class="log">'+esc(routeText())+'</pre><button class="primary" id="share">傳送到 LINE</button><button class="secondary" id="copy">複製結果</button><button class="secondary" id="down">下載 TXT</button><button class="secondary" id="restart">重新測一次</button>';
+document.getElementById('share').onclick=function(){shareR(kind)};document.getElementById('copy').onclick=function(){copyR(kind)};document.getElementById('down').onclick=function(){downR(kind)};document.getElementById('restart').onclick=function(){location.reload()};
+}
+reading();
+})();
+</script>
+</body>
+</html>
