@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>恩翔 Python Q5｜Guided Correction</title>
+<style>
+:root{--bg:#f3f5f8;--card:#fff;--ink:#162033;--muted:#667085;--line:#d7dde7;--blue:#175cd3;--green:#087443;--amber:#8a5a00;--red:#b42318}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;background:var(--bg);color:var(--ink)}
+body{padding-bottom:28px}
+.wrap{max-width:720px;margin:0 auto;padding:14px 10px 28px}
+.top,.card,.result{background:var(--card);border:1px solid var(--line);border-radius:17px;box-shadow:0 1px 3px rgba(16,24,40,.05)}
+.top{padding:16px;margin-bottom:12px}
+.badge{display:inline-block;font-size:12px;font-weight:800;padding:5px 9px;border-radius:999px;background:#eef4ff;color:#1849a9}
+h1{font-size:23px;margin:8px 0 5px;line-height:1.25}
+.sub{font-size:13px;color:var(--muted);line-height:1.55}
+.track{height:7px;background:#e5e7eb;border-radius:999px;overflow:hidden;margin-top:12px}
+.fill{height:100%;width:4%;background:var(--blue);transition:.25s}
+.status{font-size:12px;color:var(--muted);margin-top:7px}
+.card{padding:16px 14px}
+.step{font-size:13px;font-weight:800;color:#475467;margin-bottom:8px}
+.prompt{font-size:18px;line-height:1.55;font-weight:760;margin:6px 0 12px}
+.code{background:#111827;color:#f9fafb;border-radius:12px;padding:12px 13px;white-space:pre;overflow:auto;font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;margin:10px 0 14px}
+.option,.unknown,.primary,.secondary{width:100%;min-height:52px;border-radius:13px;padding:12px 13px;margin:8px 0;font-size:16px;line-height:1.4;text-align:left}
+.option{border:1.5px solid #cfd5df;background:#fff;color:var(--ink)}
+.option:active,.unknown:active,.primary:active,.secondary:active{transform:scale(.997)}
+.unknown{border:1.5px dashed #98a2b3;background:#f8fafc;color:#475467}
+.primary{border:1px solid var(--blue);background:var(--blue);color:#fff;font-weight:800;text-align:center}
+.secondary{border:1px solid #cfd5df;background:#fff;color:#344054;font-weight:800;text-align:center}
+.fb{border-left:5px solid #f4b740;border-radius:11px;background:#fff8e8;padding:12px 13px;line-height:1.55;margin:8px 0 12px}
+.fb.good{border-left-color:#12b76a;background:#ecfdf3}
+.fb.bad{border-left-color:#f04438;background:#fff1f0}
+.formula{background:#f8fafc;border:1px solid #e4e7ec;border-radius:12px;padding:12px;text-align:center;font-weight:800;margin:10px 0}
+.small{font-size:13px;color:var(--muted);line-height:1.5}
+.result{padding:16px 14px;margin-top:12px}
+.hidden{display:none!important}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:10px 0}
+.kpi{border:1px solid var(--line);border-radius:12px;padding:11px;background:#fff}
+.kpi b{display:block;font-size:17px;margin-top:3px}
+pre.log{white-space:pre-wrap;background:#f8fafc;border:1px solid #e4e7ec;border-radius:12px;padding:11px;font-size:12px;line-height:1.45;max-height:240px;overflow:auto}
+@media(max-width:520px){.grid{grid-template-columns:1fr}.prompt{font-size:17px}.wrap{padding:10px 8px 24px}.card{padding:15px 12px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <span class="badge">Q5 專項訂正｜Branching Diagnostic</span>
+    <h1>恩翔 Python｜Guided Correction</h1>
+    <div class="sub">不是重背答案。系統會依每一次作答走不同路徑，找出「題意、while 條件、變數更新、break、複選策略」哪一段不穩。</div>
+    <div class="track"><div id="fill" class="fill"></div></div>
+    <div id="status" class="status">準備開始</div>
+  </div>
+  <section id="stage" class="card"></section>
+  <section id="result" class="result hidden"></section>
+</div>
+
+<script>
+(function(){
+var state={started:Date.now(),route:[],levels:{reading:0,A:0,B:0,C:0,D:0,final:0,transfer:0},stopped:false};
+var stage=document.getElementById('stage'),result=document.getElementById('result'),fill=document.getElementById('fill'),status=document.getElementById('status');
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function setProg(p,t){fill.style.width=p+'%';status.textContent=t;}
+function opt(label,val){return '<button class="option" data-v="'+esc(val)+'">'+label+'</button>';}
+function unk(){return '<button class="unknown" data-v="__UNKNOWN__">我不懂／我不知道怎麼判斷</button>';}
+function mount(html,handler){stage.innerHTML=html;var bs=stage.querySelectorAll('button[data-v]');for(var i=0;i<bs.length;i++){bs[i].onclick=function(){handler(this.getAttribute('data-v'));};}}
+function log(step,answer,note){state.route.push({step:step,answer:answer,note:note||'',t:Math.round((Date.now()-state.started)/1000)});}
+function stop(step){log(step,'NOT_UNDERSTOOD','student chose stop');state.stopped=true;stage.classList.add('hidden');showResult('stopped');}
+function baseQuestion(){return '<div class="code">i = 0\\nwhile i &lt; 3:\\n    print(i)</div>';}
+
+function reading(){setProg(8,'Gate 1｜先看懂 eventually stop');mount(
+'<div class="step">Gate 1｜題意判讀</div><div class="prompt">“Which changes can make this loop eventually stop?” 真正要你判斷的是什麼？</div>'+baseQuestion()+
+opt('A. 哪些修改可以讓這個迴圈最後不再繼續執行','A')+
+opt('B. 哪些修改會讓它至少先跑一次，再停止','B')+
+opt('C. 哪些修改可以讓 print() 印出不同內容','C')+
+opt('D. 哪些修改看起來比較像 Python 語法','D')+unk(),
+function(v){if(v==='__UNKNOWN__')return stop('reading');log('reading',v,'first meaning of eventually stop');if(v==='A'){state.levels.reading=0;gateA();}else if(v==='B'){state.levels.reading=1;readingZeroHint();}else{state.levels.reading=1;readingHint();}});}
+function readingHint(){setProg(11,'Gate 1｜Hint');mount(
+'<div class="step">Gate 1｜提示</div><div class="fb bad">這題不是問輸出，也不是問語法長得像不像。只看關鍵字 <b>eventually stop</b>。</div>'+
+'<div class="prompt">如果一個 while 迴圈從某一刻開始「不再執行」，它是否算 stop？</div>'+
+opt('A. 算','A')+opt('B. 不算','B')+unk(),
+function(v){if(v==='__UNKNOWN__')return stop('reading_hint');log('reading_hint',v,'focus on stop');if(v==='A')gateA();else readingMini();});}
+function readingZeroHint(){setProg(11,'Gate 1｜釐清零次執行');mount(
+'<div class="step">Gate 1｜你剛剛選的是「至少要跑一次」</div><div class="fb">注意：while 的條件是在<b>進入迴圈前</b>先檢查。條件一開始就是 False 時，迴圈可以執行 0 次。</div>'+
+'<div class="prompt">如果條件一開始就是 False，這個 while 會不會一直跑下去？</div>'+
+opt('A. 不會，它連第一次都不進去','A')+opt('B. 會，它一定至少執行一次','B')+unk(),
+function(v){if(v==='__UNKNOWN__')return stop('reading_zero_hint');log('reading_zero_hint',v,'zero-iteration concept');if(v==='A')gateA();else readingMini();});}
+function readingMini(){state.levels.reading=2;setProg(13,'Gate 1｜Mini Lesson');mount(
+'<div class="step">Mini Lesson｜while 不是 do...while</div><div class="formula">先檢查條件 → True 才進入 → False 就跳過</div>'+
+'<div class="small">因此「eventually stop」包含兩種情況：跑幾次後停；或一開始條件就是 False，0 次執行。</div>'+
+'<div class="prompt">驗證：x = 5，條件是 while x &lt; 0。迴圈本體會執行幾次？</div>'+
+opt('A. 0 次','A')+opt('B. 1 次','B')+opt('C. 無限次','C')+unk(),
+function(v){if(v==='__UNKNOWN__')return stop('reading_mini');log('reading_mini_verify',v,'verify zero-iteration');if(v==='A')gateA();else readingMini();});}
+
+function gateA(){setProg(24,'Gate 2A｜逐項判斷 A');mount(
+'<div class="step">Gate 2A｜不要一次看四個選項，只判斷 A</div>'+baseQuestion()+
+'<div class="prompt">A. 在迴圈內加入 <code>i += 1</code>。這個修改能讓迴圈最後停止嗎？</div>'+
+opt('A. 能','YES')+opt('B. 不能','NO')+unk(),
+function(v){if(v==='__UNKNOWN__')return stop('A');log('A_first',v,'i += 1');if(v==='YES'){state.levels.A=0;gateB();}else{state.levels.A=1;gateAHint();}});}
+function gateAHint(){setProg(27,'Gate 2A｜Hint');mount(
+'<div class="step">A｜提示</div><div class="fb bad">不要先看最後答案，只追蹤 i。</div><div class="prompt">若每圈都做 i += 1，i 的值會怎麼走？</div>'+
+opt('A. 0 → 1 → 2 → 3','A')+opt('B. 永遠維持 0','B')+opt('C. 3 → 2 → 1 → 0','C')+unk(),
+function(v){if(v==='__UNKNOWN__')return stop('A_hint');log('A_hint',v,'trace i');if(v==='A')gateB();else gateAMini();});}
+function gateAMini(){state.levels.A=2;setProg(29,'Gate 2A｜Mini Lesson');mount(
+'<div class="step">A｜Mini Lesson</div><div class="formula">i: 0 → 1 → 2 → 3<br>檢查 3 &lt; 3 → False</div>'+
+'<div class="prompt">所以「改變控制變數，讓條件最後變 False」是不是一種停止迴圈的方法？</div>'+
+opt('A. 是','YES')+opt('B. 不是','NO')+unk(),
+function(v){if(v==='__UNKNOWN__')return stop('A_mini');log('A_mini_verify',v,'control variable');if(v==='YES')gateB();else gateAMini();});}
+
+function gateB(){setProg(38,'Gate 2B｜逐項判斷 B');mount(
+'<div class="step">Gate 2B｜這是你原本漏掉的選項</div><div class="code">i = 0\\nwhile i &lt; 0:\\n    print(i)</div>'+
+'<div class="prompt">B. 把條件改成 <code>while i &lt; 0</code>。這樣能讓迴圈不再持續執行嗎？</div>'+
+opt('A. 能','YES')+opt('B. 不能','NO')+unk(),
+function(v){if(v==='__UNKNOWN__')return stop('B');log('B_first',v,'condition i < 0 with i=0');if(v==='YES'){state.levels.B=0;gateC();}else{state.levels.B=1;gateBHint();}});}
+function gateBHint(){setProg(41,'Gate 2B｜Hint');mount(
+'<div class="step">B｜提示</div><div class="fb bad">while 在跑第一圈之前就先檢查條件。</div><div class="prompt">現在 i = 0。判斷 <code>0 &lt; 0</code> 是：</div>'+
+opt('A. True','T')+opt('B. False','F')+unk(),
+function(v){if(v==='__UNKNOWN__')return stop('B_hint');log('B_hint_condition',v,'evaluate 0 < 0');if(v==='F')gateBVerify();else gateBMini();});}
+function gateBVerify(){setProg(43,'Gate 2B｜驗證');mount(
+'<div class="step">B｜再走一步</div><div class="prompt">如果第一次檢查就是 False，迴圈本體會：</div>'+
+opt('A. 執行 0 次，直接跳過','ZERO')+opt('B. 還是先執行一次','ONE')+unk(),
+function(v){if(v==='__UNKNOWN__')return stop('B_verify');log('B_verify',v,'zero iterations');if(v==='ZERO')gateC();else gateBMini();});}
+function gateBMini(){state.levels.B=2;setProg(45,'Gate 2B｜Mini Lesson');mount(
+'<div class="step">B｜Mini Lesson</div><div class="formula">i = 0<br>先檢查：0 &lt; 0 → False<br>所以 body 執行 0 次</div>'+
+'<div class="fb">這是這題最容易漏的陷阱：<b>「停止」不代表一定要先跑過。</b></div>'+
+'<div class="prompt">換一個數字：n = 4，若條件改成 <code>while n &lt; 2</code>，本體會執行幾次？</div>'+
+opt('A. 0 次','ZERO')+opt('B. 1 次','ONE')+opt('C. 無限次','INF')+unk(),
+function(v){if(v==='__UNKNOWN__')return stop('B_mini');log('B_mini_verify',v,'transfer zero-iteration');if(v==='ZERO')gateC();else gateBMini();});}
+
+function gateC(){setProg(54,'Gate 2C｜逐項判斷 C');mount(
+'<div class="step">Gate 2C｜判斷看似「有改程式」但其實沒改條件</div>'+baseQuestion()+
+'<div class="prompt">C. 把 <code>print(i)</code> 換成 <code>str(i)</code>。這能讓迴圈最後停止嗎？</div>'+
+opt('A. 能','YES')+opt('B. 不能','NO')+unk(),
+function(v){if(v==='__UNKNOWN__')return stop('C');log('C_first',v,'str(i)');if(v==='NO'){state.levels.C=0;gateD();}else{state.levels.C=1;gateCHint();}});}
+function gateCHint(){setProg(57,'Gate 2C｜Hint');mount(
+'<div class="step">C｜提示</div><div class="fb bad"><code>str(i)</code> 會建立字串表示，但這一行沒有把結果存回 i。</div>'+
+'<div class="prompt">執行 <code>str(i)</code> 後，i 原本是 0，i 本身會變成什麼？</div>'+
+opt('A. 仍然是整數 0','ZERO')+opt('B. 會自動變成字串 "0"','STR')+opt('C. 會變成 1','ONE')+unk(),
+function(v){if(v==='__UNKNOWN__')return stop('C_hint');log('C_hint',v,'str does not assign');if(v==='ZERO')gateD();else gateCMini();});}
+function gateCMini(){state.levels.C=2;setProg(59,'Gate 2C｜Mini Lesson');mount(
+'<div class="step">C｜Mini Lesson</div><div class="formula">str(i) 只是回傳字串<br>沒有 i = str(i)，i 不會被改掉</div>'+
+'<div class="small">而且就算改了輸出內容，只要控制 while 的條件沒有被改變，無限迴圈仍可能繼續。</div>'+
+'<div class="prompt">哪一件事才是這題真正要追蹤的？</div>'+
+opt('A. i 或 while 條件是否發生能讓條件變 False 的改變','A')+opt('B. print() 顯示得漂不漂亮','B')+unk(),
+function(v){if(v==='__UNKNOWN__')return stop('C_mini');log('C_mini_verify',v,'track control state');if(v==='A')gateD();else gateCMini();});}
+
+function gateD(){setProg(67,'Gate 2D｜逐項判斷 D');mount(
+'<div class="step">Gate 2D｜判斷 break</div>'+baseQuestion()+
+'<div class="prompt">D. 在迴圈中加入 <code>break</code>。當程式執行到 break 時，會：</div>'+
+opt('A. 立刻離開目前這個迴圈','EXIT')+opt('B. 只跳過 print()，下一圈照常','SKIP')+opt('C. 把 i 自動加 1','INC')+unk(),
+function(v){if(v==='__UNKNOWN__')return stop('D');log('D_first',v,'break');if(v==='EXIT'){state.levels.D=0;finalRetry();}else{state.levels.D=1;gateDHint();}});}
+function gateDHint(){setProg(70,'Gate 2D｜Hint');mount(
+'<div class="step">D｜提示</div><div class="fb bad"><b>break</b> 的作用不是改變變數，而是直接跳出目前的 loop。</div>'+
+'<div class="prompt">所以當執行到 break 後，while 還會繼續下一圈嗎？</div>'+
+opt('A. 不會','NO')+opt('B. 會','YES')+unk(),
+function(v){if(v==='__UNKNOWN__')return stop('D_hint');log('D_hint',v,'break exits loop');if(v==='NO')finalRetry();else gateDMini();});}
+function gateDMini(){state.levels.D=2;setProg(72,'Gate 2D｜Mini Lesson');mount(
+'<div class="step">D｜Mini Lesson</div><div class="formula">break → 立即離開目前的迴圈</div>'+
+'<div class="prompt">如果 while 條件本來永遠 True，但某一圈確實執行到 break，這個迴圈能停止嗎？</div>'+
+opt('A. 能','YES')+opt('B. 不能','NO')+unk(),
+function(v){if(v==='__UNKNOWN__')return stop('D_mini');log('D_mini_verify',v,'break in true loop');if(v==='YES')finalRetry();else gateDMini();});}
+
+function finalRetry(){
+setProg(80,'Gate 3｜回到原題重答');
+mount(
+'<div class="step">Gate 3｜現在才回原題</div><div class="prompt">Select all that apply. Which changes can make this loop eventually stop?</div>'+baseQuestion()+
+'<div class="small">請逐項判 True / False，不要靠「感覺像答案」。</div>'+
+'<button class="option pick" data-v="0">A. Add <code>i += 1</code> inside the loop</button>'+
+'<button class="option pick" data-v="1">B. Change the condition to <code>while i &lt; 0</code></button>'+
+'<button class="option pick" data-v="2">C. Replace <code>print(i)</code> with <code>str(i)</code></button>'+
+'<button class="option pick" data-v="3">D. Add <code>break</code> inside the loop</button>'+
+'<button id="submitMulti" class="primary">送出這次選擇</button>'+
+'<button class="unknown" data-v="__UNKNOWN__">我還是不懂</button>',
+function(v){if(v==='__UNKNOWN__')stop('final_retry');}
+);
+var picks=stage.querySelectorAll('.pick');
+for(var i=0;i<picks.length;i++){picks[i].onclick=function(){this.classList.toggle('sel');this.style.borderColor=this.classList.contains('sel')?'#175cd3':'#cfd5df';this.style.background=this.classList.contains('sel')?'#f5f8ff':'#fff';};}
+document.getElementById('submitMulti').onclick=function(){
+var vals=[],ps=stage.querySelectorAll('.pick.sel');for(var i=0;i<ps.length;i++)vals.push(Number(ps[i].getAttribute('data-v')));vals.sort();
+var s=vals.join(',');log('final_retry',s,'original Q5 retry');
+if(s==='0,1,3'){state.levels.final=0;transfer();}else{state.levels.final=1;finalRepair(vals);}
+};}
+function finalRepair(vals){
+setProg(83,'Gate 3｜整合修正');
+var msg='';
+if(vals.indexOf(1)<0)msg+='你仍然漏掉 B：請回想「條件一開始 False → 0 次執行」。<br>';
+if(vals.indexOf(2)>=0)msg+='你多選了 C：<code>str(i)</code> 沒有改變控制條件。<br>';
+if(vals.indexOf(0)<0)msg+='你漏掉 A：<code>i += 1</code> 會讓條件最後變 False。<br>';
+if(vals.indexOf(3)<0)msg+='你漏掉 D：<code>break</code> 可直接離開迴圈。<br>';
+mount(
+'<div class="step">Gate 3｜整合提示</div><div class="fb bad">'+msg+'</div>'+
+'<div class="formula">逐項問自己：<br>「它有沒有讓 while 最後不再繼續？」</div>'+
+'<button id="again" class="primary">重新作答原題</button>'+unk(),
+function(v){if(v==='__UNKNOWN__')stop('final_repair');});
+document.getElementById('again').onclick=function(){finalRetry();};
+}
+
+function transfer(){
+setProg(91,'Gate 4｜換題驗證，不靠記答案');
+mount(
+'<div class="step">Gate 4｜Transfer Check</div><div class="prompt">換一題，但觀念相同。哪些修改能讓這個迴圈最後停止？</div>'+
+'<div class="code">n = 4\\nwhile n &gt; 0:\\n    print(n)</div>'+
+'<button class="option tpick" data-v="0">A. Replace <code>print(n)</code> with <code>str(n)</code></button>'+
+'<button class="option tpick" data-v="1">B. Add <code>n -= 1</code> inside the loop</button>'+
+'<button class="option tpick" data-v="2">C. Change the condition to <code>while n &lt; 0</code></button>'+
+'<button class="option tpick" data-v="3">D. Add <code>break</code> inside the loop</button>'+
+'<button id="submitTransfer" class="primary">送出驗證題</button>'+
+'<button class="unknown" data-v="__UNKNOWN__">我不懂／不知道怎麼判斷</button>',
+function(v){if(v==='__UNKNOWN__')stop('transfer');}
+);
+var ps=stage.querySelectorAll('.tpick');
+for(var i=0;i<ps.length;i++){ps[i].onclick=function(){this.classList.toggle('sel');this.style.borderColor=this.classList.contains('sel')?'#175cd3':'#cfd5df';this.style.background=this.classList.contains('sel')?'#f5f8ff':'#fff';};}
+document.getElementById('submitTransfer').onclick=function(){
+var vals=[],q=stage.querySelectorAll('.tpick.sel');for(var i=0;i<q.length;i++)vals.push(Number(q[i].getAttribute('data-v')));vals.sort();
+var s=vals.join(',');log('transfer',s,'new loop transfer');
+if(s==='1,2,3'){state.levels.transfer=0;showResult('mastered');}else{state.levels.transfer=1;transferRepair(vals);}
+};}
+function transferRepair(){
+setProg(94,'Gate 4｜Transfer 修正');
+mount(
+'<div class="step">Transfer Check｜還沒有完全穩</div>'+
+'<div class="fb bad">這題不是要背 A/B/D。請重新用三個規則逐項看：<br>① 控制變數有沒有朝終止方向改？<br>② 條件是否一開始就 False？<br>③ 有沒有 break？</div>'+
+'<button id="tryTransfer" class="primary">再做一次驗證題</button>'+unk(),
+function(v){if(v==='__UNKNOWN__')stop('transfer_repair');});
+document.getElementById('tryTransfer').onclick=function(){transfer();};
+}
+
+function levelText(n){return n===0?'首次通過':(n===1?'提示後通過':'Mini Lesson 後通過');}
+function makeSummary(){var rows=[['題意 eventually stop',levelText(state.levels.reading)],['A｜控制變數更新',levelText(state.levels.A)],['B｜0 次執行陷阱',levelText(state.levels.B)],['C｜無關修改辨識',levelText(state.levels.C)],['D｜break',levelText(state.levels.D)]],out='';for(var i=0;i<rows.length;i++)out+='<div class="kpi"><span class="small">'+rows[i][0]+'</span><b>'+rows[i][1]+'</b></div>';return out;}
+function diagnosticText(){var weak=[];if(state.levels.reading>0)weak.push('英文題意 / eventually stop');if(state.levels.A>0)weak.push('控制變數如何讓 while 終止');if(state.levels.B>0)weak.push('while 先檢查條件、可執行 0 次');if(state.levels.C>0)weak.push('辨識「改了程式但沒改終止條件」');if(state.levels.D>0)weak.push('break 的作用');return weak.length?'本次真正需要補強：'+weak.join('、')+'。':'本題核心概念可直接辨識；後續重點是維持複選題逐項判斷習慣。';}
+function routeText(){var a=[];for(var i=0;i<state.route.length;i++){var r=state.route[i];a.push((i+1)+'. '+r.step+' → '+r.answer+(r.note?' | '+r.note:''));}return a.join('\\n');}
+function showResult(kind){
+setProg(100,'完成');stage.classList.add('hidden');result.classList.remove('hidden');
+var title='',box='';
+if(kind==='stopped'){title='本題已停止';box='<div class="fb">他選了「不懂」，依規則不再逼答，也不公布原題答案。這題標記為 <b>Needs Reteaching</b>。</div>';}
+else{title='Guided Correction 完成';box='<div class="fb good"><b>新題驗證通過。</b> 不是只把原 Q5 記回來，而是把相同概念換題再確認一次。</div>';}
+result.innerHTML='<h2 style="margin:0 0 8px">'+title+'</h2>'+box+'<div class="grid">'+makeSummary()+'</div><div class="fb"><b>診斷：</b><br>'+diagnosticText()+'</div><div class="small">下面是完整作答路徑，之後可以貼回 ChatGPT 做下一輪分析。</div><pre class="log" id="routeLog">'+esc(routeText())+'</pre><button class="primary" id="copyBtn">複製訂正結果</button><button class="secondary" id="restartBtn">重新測一次</button>';
+document.getElementById('copyBtn').onclick=function(){var txt='En-Xiang Python Q5 Guided Correction\\n'+diagnosticText()+'\\n\\n'+routeText();if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(function(){alert('已複製');},function(){fallback(txt);});}else fallback(txt);};
+document.getElementById('restartBtn').onclick=function(){location.reload();};
+}
+function fallback(txt){var ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');alert('已複製');}catch(e){alert('此瀏覽器無法自動複製，請長按下方紀錄。');}document.body.removeChild(ta);}
+reading();
+})();
+</script>
+</body>
+</html>
