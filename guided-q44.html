@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>恩翔 Python Q44｜try/except Guided Correction</title>
+<style>
+:root{--bg:#f3f5f8;--card:#fff;--ink:#162033;--muted:#667085;--line:#d7dde7;--blue:#175cd3}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC","Microsoft JhengHei",sans-serif;background:var(--bg);color:var(--ink)}
+body{padding-bottom:28px}.wrap{max-width:720px;margin:0 auto;padding:14px 10px 28px}
+.top,.card,.result{background:#fff;border:1px solid var(--line);border-radius:17px;box-shadow:0 1px 3px rgba(16,24,40,.05)}
+.top{padding:16px;margin-bottom:12px}.badge{display:inline-block;font-size:12px;font-weight:800;padding:5px 9px;border-radius:999px;background:#eef4ff;color:#1849a9}
+h1{font-size:23px;margin:8px 0 5px}.sub,.small{font-size:13px;color:var(--muted);line-height:1.55}
+.track{height:7px;background:#e5e7eb;border-radius:999px;overflow:hidden;margin-top:12px}.fill{height:100%;width:4%;background:var(--blue);transition:.25s}.status{font-size:12px;color:var(--muted);margin-top:7px}
+.card{padding:16px 14px}.step{font-size:13px;font-weight:800;color:#475467;margin-bottom:8px}.prompt{font-size:18px;line-height:1.55;font-weight:760;margin:6px 0 12px}
+.code{background:#111827;color:#fff;border-radius:12px;padding:12px 13px;white-space:pre;overflow:auto;font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;margin:10px 0 14px}
+.option,.unknown,.primary,.secondary{width:100%;min-height:52px;border-radius:13px;padding:12px 13px;margin:8px 0;font-size:16px;line-height:1.4;text-align:left}
+.option{border:1.5px solid #cfd5df;background:#fff}.unknown{border:1.5px dashed #98a2b3;background:#f8fafc;color:#475467}
+.primary{border:1px solid var(--blue);background:var(--blue);color:white;font-weight:800;text-align:center}.secondary{border:1px solid #cfd5df;background:#fff;font-weight:800;text-align:center}
+.fb{border-left:5px solid #f4b740;border-radius:11px;background:#fff8e8;padding:12px 13px;line-height:1.55;margin:8px 0 12px}.fb.good{border-left-color:#12b76a;background:#ecfdf3}.fb.bad{border-left-color:#f04438;background:#fff1f0}
+.formula{background:#f8fafc;border:1px solid #e4e7ec;border-radius:12px;padding:12px;text-align:center;font-weight:800;margin:10px 0}
+.result{padding:16px 14px;margin-top:12px}.hidden{display:none!important}.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:10px 0}.kpi{border:1px solid var(--line);border-radius:12px;padding:11px}.kpi b{display:block;font-size:17px;margin-top:3px}
+pre.log{white-space:pre-wrap;background:#f8fafc;border:1px solid #e4e7ec;border-radius:12px;padding:11px;font-size:12px;line-height:1.45;max-height:260px;overflow:auto}
+@media(max-width:520px){.grid{grid-template-columns:1fr}.prompt{font-size:17px}.wrap{padding:10px 8px 24px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="top">
+<span class="badge">Q44 專項訂正｜try / except / else / finally</span>
+<h1>恩翔 Python｜Guided Correction</h1>
+<div class="sub">用逐段追蹤找出問題：例外是否發生、except、else、finally、最後輸出順序。</div>
+<div class="track"><div id="fill" class="fill"></div></div>
+<div id="status" class="status">準備開始</div>
+</div>
+<section id="stage" class="card"></section>
+<section id="result" class="result hidden"></section>
+</div>
+
+<script>
+(function(){
+var state={started:Date.now(),route:[],levels:{reading:-1,t:-1,e:-1,el:-1,f:-1,final:-1,transfer:-1},stopped:false};
+var stage=document.getElementById('stage'),result=document.getElementById('result'),fill=document.getElementById('fill'),status=document.getElementById('status');
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function setProg(p,t){fill.style.width=p+'%';status.textContent=t;}
+function opt(t,v){return '<button class="option" data-v="'+esc(v)+'">'+t+'</button>';}
+function unk(){return '<button class="unknown" data-v="__U__">我不懂／我不知道怎麼判斷</button>';}
+function mount(h,fn){stage.innerHTML=h;var b=stage.querySelectorAll('button[data-v]');for(var i=0;i<b.length;i++)b[i].onclick=function(){fn(this.getAttribute('data-v'));};}
+function log(s,a,n){state.route.push({step:s,answer:a,note:n||''});}
+function stop(s){log(s,'NOT_UNDERSTOOD');state.stopped=true;stage.classList.add('hidden');showResult('stopped');}
+function code(){return '<div class="code">try:\n    print("A")\nexcept ValueError:\n    print("D")\nelse:\n    print("B")\nfinally:\n    print("C")</div>';}
+
+function reading(){setProg(8,'第 1 關｜題意判讀');mount(
+'<div class="step">第 1 關｜先看懂題目</div><div class="prompt">What is the output order after execution?<br><br><b>中文：這段程式執行後，實際輸出的先後順序是什麼？</b></div>'+code()+
+'<div class="prompt">第一步最應該做什麼？</div>'+
+opt('A. 先看 try 裡是否發生例外，再決定 except / else / finally 哪些會執行','A')+
+opt('B. 看到 except 就先假設它一定會執行','B')+
+opt('C. 只看 finally','C')+unk(),
+function(v){if(v==='__U__')return stop('reading');log('reading',v);if(v==='A'){state.levels.reading=0;gateTry();}else{state.levels.reading=1;readingHint();}});}
+function readingHint(){setProg(11,'第 1 關｜提示');mount(
+'<div class="fb bad">這題要追蹤「哪些區塊真的執行」。第一個分岔點是 try 裡有沒有發生例外。</div>'+
+'<div class="prompt">所以第一個要看的區塊是？</div>'+opt('A. try','T')+opt('B. finally','F')+opt('C. except','E')+unk(),
+function(v){if(v==='__U__')return stop('reading_hint');log('reading_hint',v);if(v==='T')gateTry();else readingMini();});}
+function readingMini(){state.levels.reading=2;setProg(13,'第 1 關｜微教學');mount(
+'<div class="formula">先執行 try → 判斷有沒有例外 → except 或 else → finally</div>'+
+'<div class="prompt">要知道 except 會不會執行，第一個要知道的是？</div>'+opt('A. try 是否發生符合的例外','A')+opt('B. finally 印什麼','B')+unk(),
+function(v){if(v==='__U__')return stop('reading_mini');log('reading_mini',v);if(v==='A')gateTry();else readingMini();});}
+
+function gateTry(){setProg(24,'第 2 關｜try');mount(
+'<div class="step">第 2 關｜try</div>'+code()+
+'<div class="prompt">try 裡只有 <code>print("A")</code>。這一行會造成 ValueError 嗎？</div>'+
+opt('A. 不會，正常印出 A','NO')+opt('B. 會','YES')+unk(),
+function(v){if(v==='__U__')return stop('try');log('try_first',v);if(v==='NO'){state.levels.t=0;gateExcept();}else{state.levels.t=1;tryHint();}});}
+function tryHint(){setProg(27,'第 2 關｜提示');mount(
+'<div class="fb bad"><code>print("A")</code> 只是正常輸出字串，本身不會產生 ValueError。</div>'+
+'<div class="prompt">所以目前第一個輸出是？</div>'+opt('A. A','A')+opt('B. D','D')+opt('C. 沒有輸出','N')+unk(),
+function(v){if(v==='__U__')return stop('try_hint');log('try_hint',v);if(v==='A')gateExcept();else tryMini();});}
+function tryMini(){state.levels.t=2;setProg(29,'第 2 關｜微教學');mount(
+'<div class="formula">print("A") → 正常執行 → 輸出 A → 沒有例外</div>'+
+'<div class="prompt"><code>print("Hello")</code> 是否會因為只是印字串就自動產生 ValueError？</div>'+opt('A. 不會','NO')+opt('B. 會','YES')+unk(),
+function(v){if(v==='__U__')return stop('try_mini');log('try_mini',v);if(v==='NO')gateExcept();else tryMini();});}
+
+function gateExcept(){setProg(40,'第 3 關｜except');mount(
+'<div class="fb">已知 try 正常完成，沒有 ValueError。</div>'+
+'<div class="prompt"><code>except ValueError:</code> 裡的 <code>print("D")</code> 會執行嗎？</div>'+
+opt('A. 不會','SKIP')+opt('B. 會','RUN')+unk(),
+function(v){if(v==='__U__')return stop('except');log('except_first',v);if(v==='SKIP'){state.levels.e=0;gateElse();}else{state.levels.e=1;exceptHint();}});}
+function exceptHint(){setProg(43,'第 3 關｜提示');mount(
+'<div class="fb bad">except 只有在 try 發生符合的例外時才處理。</div>'+
+'<div class="prompt">try 沒有例外時，matching except 應該？</div>'+opt('A. 跳過','S')+opt('B. 執行','R')+unk(),
+function(v){if(v==='__U__')return stop('except_hint');log('except_hint',v);if(v==='S')gateElse();else exceptMini();});}
+function exceptMini(){state.levels.e=2;setProg(45,'第 3 關｜微教學');mount(
+'<div class="formula">try 正常完成 → except 不執行</div>'+
+'<div class="prompt">如果 try 只有 <code>x = 3 + 2</code>，except ValueError 會跑嗎？</div>'+opt('A. 不會','NO')+opt('B. 會','YES')+unk(),
+function(v){if(v==='__U__')return stop('except_mini');log('except_mini',v);if(v==='NO')gateElse();else exceptMini();});}
+
+function gateElse(){setProg(56,'第 4 關｜else');mount(
+'<div class="fb">目前：try 正常完成，except 被跳過。</div>'+
+'<div class="prompt">這時 <code>else:</code> 裡的 <code>print("B")</code> 會執行嗎？</div>'+
+opt('A. 會，try 沒有例外時會進入 else','RUN')+opt('B. 不會','SKIP')+unk(),
+function(v){if(v==='__U__')return stop('else');log('else_first',v);if(v==='RUN'){state.levels.el=0;gateFinally();}else{state.levels.el=1;elseHint();}});}
+function elseHint(){setProg(59,'第 4 關｜提示');mount(
+'<div class="fb bad">try/except/else 中，else 是在 try 沒有發生例外時執行。</div>'+
+'<div class="prompt">所以這題 else 會印出？</div>'+opt('A. B','B')+opt('B. D','D')+opt('C. 無','N')+unk(),
+function(v){if(v==='__U__')return stop('else_hint');log('else_hint',v);if(v==='B')gateFinally();else elseMini();});}
+function elseMini(){state.levels.el=2;setProg(61,'第 4 關｜微教學');mount(
+'<div class="formula">try 無例外 → except 跳過 → else 執行</div>'+
+'<div class="prompt">try 正常完成時，else 會不會執行？</div>'+opt('A. 會','Y')+opt('B. 不會','N')+unk(),
+function(v){if(v==='__U__')return stop('else_mini');log('else_mini',v);if(v==='Y')gateFinally();else elseMini();});}
+
+function gateFinally(){setProg(70,'第 5 關｜finally');mount(
+'<div class="fb">目前已確定先輸出 A，再輸出 B。</div>'+
+'<div class="prompt"><code>finally:</code> 裡的 <code>print("C")</code> 會執行嗎？</div>'+
+opt('A. 會','RUN')+opt('B. 不會','SKIP')+unk(),
+function(v){if(v==='__U__')return stop('finally');log('finally_first',v);if(v==='RUN'){state.levels.f=0;finalRetry();}else{state.levels.f=1;finallyHint();}});}
+function finallyHint(){setProg(73,'第 5 關｜提示');mount(
+'<div class="fb bad">finally 通常用來做不論前面成功或發生例外都要做的收尾。</div>'+
+'<div class="prompt">所以這題最後還會印出？</div>'+opt('A. C','C')+opt('B. D','D')+opt('C. 無','N')+unk(),
+function(v){if(v==='__U__')return stop('finally_hint');log('finally_hint',v);if(v==='C')finalRetry();else finallyMini();});}
+function finallyMini(){state.levels.f=2;setProg(75,'第 5 關｜微教學');mount(
+'<div class="formula">finally → 正常情況會執行；例外被處理時也會執行</div>'+
+'<div class="prompt">try 正常完成時，finally 通常會不會跑？</div>'+opt('A. 會','Y')+opt('B. 不會','N')+unk(),
+function(v){if(v==='__U__')return stop('finally_mini');log('finally_mini',v);if(v==='Y')finalRetry();else finallyMini();});}
+
+function finalRetry(){setProg(83,'第 6 關｜回原題');mount(
+'<div class="step">第 6 關｜整合順序</div><div class="prompt">What is the output order after execution?<br><br><b>中文：實際輸出順序是什麼？</b></div>'+code()+
+opt('A. D, A, C','A')+opt('B. A, C','B')+opt('C. A, D, C','C')+opt('D. A, B, C','D')+unk(),
+function(v){if(v==='__U__')return stop('final');log('final_retry',v);if(v==='D'){state.levels.final=0;transfer();}else{state.levels.final=1;finalRepair(v);}});}
+function finalRepair(v){
+var msg=v==='B'?'你漏掉了 else：try 沒有例外時，else 會執行。':'這題沒有 ValueError，所以 except 的 D 不會執行。';
+mount('<div class="fb bad">'+msg+'</div><div class="formula">try 正常 → A<br>except 跳過<br>else → B<br>finally → C</div><button id="again" class="primary">重新作答原題</button>'+unk(),
+function(x){if(x==='__U__')stop('final_repair');});
+document.getElementById('again').onclick=finalRetry;
+}
+
+function transfer(){setProg(92,'第 7 關｜換題驗證');mount(
+'<div class="step">第 7 關｜Transfer Check</div><div class="prompt">這次 try 真的會發生 ValueError。輸出順序是？</div>'+
+'<div class="code">try:\n    print("X")\n    int("abc")\nexcept ValueError:\n    print("Y")\nelse:\n    print("Z")\nfinally:\n    print("W")</div>'+
+opt('A. X, Y, W','A')+opt('B. X, Z, W','B')+opt('C. Y, Z, W','C')+opt('D. X, Y, Z, W','D')+unk(),
+function(v){if(v==='__U__')return stop('transfer');log('transfer',v);if(v==='A'){state.levels.transfer=0;showResult('mastered');}else{state.levels.transfer=1;transferRepair(v);}});}
+function transferRepair(v){
+var msg=v==='B'?'這次有 ValueError，所以應進 except，不進 else。':(v==='C'?'錯誤前已先印出 X，不能漏掉 X。':'發生例外並進 except 後，else 不會執行。');
+mount('<div class="fb bad">'+msg+'</div><div class="formula">先印 X → ValueError → except 印 Y → else 跳過 → finally 印 W</div><button id="retry" class="primary">再做一次換題驗證</button>'+unk(),
+function(x){if(x==='__U__')stop('transfer_repair');});
+document.getElementById('retry').onclick=transfer;
+}
+
+function levelText(n){return n===-1?'未進行':(n===0?'首次通過':(n===1?'提示後通過':'Mini Lesson 後通過'));}
+function diagnosticText(){
+if(state.stopped){var last=state.route[state.route.length-1];return '學生在「'+last.step+'」選擇不懂，本題標記為 Needs Reteaching。';}
+var w=[];if(state.levels.reading>0)w.push('題意與流程追蹤');if(state.levels.t>0)w.push('判斷 try 是否發生例外');if(state.levels.e>0)w.push('except 執行條件');if(state.levels.el>0)w.push('else 執行時機');if(state.levels.f>0)w.push('finally 執行時機');if(state.levels.final>0)w.push('整合輸出順序');if(state.levels.transfer>0)w.push('概念轉移');
+return w.length?'本次真正需要補強：'+w.join('、')+'。':'try / except / else / finally 核心流程可直接辨識；後續重點是維持逐段追蹤。';
+}
+function routeText(){var a=[];for(var i=0;i<state.route.length;i++){var r=state.route[i];a.push((i+1)+'. '+r.step+' → '+r.answer);}return a.join('\n');}
+function resultText(kind){
+var L=['En-Xiang Python Q44 Guided Correction - Result','Version: GUIDED_Q44_TRY_EXCEPT_20260928_V1','Completed: '+(new Date()).toLocaleString(),'Status: '+(kind==='stopped'?'NOT UNDERSTOOD / STOPPED':'GUIDED CORRECTION COMPLETED'),'','DIAGNOSIS',diagnosticText(),'','GATE SUMMARY','題意判讀: '+levelText(state.levels.reading),'try 是否發生例外: '+levelText(state.levels.t),'except 是否執行: '+levelText(state.levels.e),'else 何時執行: '+levelText(state.levels.el),'finally 何時執行: '+levelText(state.levels.f)];
+if(!state.stopped){L.push('原題重答: '+(state.levels.final===0?'PASS':'needed repair'));L.push('換題驗證: '+(state.levels.transfer===0?'PASS':'needed repair'));}
+L.push('','ANSWER PATH',routeText());return L.join('\r\n');
+}
+function fallbackCopy(txt){var ta=document.createElement('textarea');ta.value=txt;ta.style.position='fixed';ta.style.left='-9999px';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');alert('已複製');}catch(e){}document.body.removeChild(ta);}
+function copyResult(k){var txt=resultText(k);if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(function(){alert('已複製');},function(){fallbackCopy(txt);});}else fallbackCopy(txt);}
+function downloadResult(k){var txt=resultText(k),b=new Blob([txt],{type:'text/plain;charset=utf-8'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download='EnXiang_Python_Q44_GuidedCorrection_Result.txt';document.body.appendChild(a);a.click();setTimeout(function(){a.remove();URL.revokeObjectURL(u);},500);}
+function shareResult(k){var txt=resultText(k),f=null;try{f=new File([txt],'EnXiang_Python_Q44_GuidedCorrection_Result.txt',{type:'text/plain'});}catch(e){}
+if(navigator.share){try{if(f&&navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({title:'恩翔 Python Q44 訂正結果',files:[f],text:'Q44 Guided Correction 完成'});return;}navigator.share({title:'恩翔 Python Q44 訂正結果',text:txt});return;}catch(e){}}
+copyResult(k);
+}
+function showResult(kind){setProg(100,'完成');stage.classList.add('hidden');result.classList.remove('hidden');
+var box=kind==='stopped'?'<div class="fb">選擇「不懂」，本題停止，不公布原題答案。</div>':'<div class="fb good"><b>換題驗證通過。</b> 已確認能把流程轉移到新情境。</div>';
+result.innerHTML='<h2>Guided Correction 完成</h2>'+box+'<div class="fb"><b>診斷：</b><br>'+diagnosticText()+'</div><pre class="log">'+esc(routeText())+'</pre><button class="primary" id="share">傳送到 LINE</button><button class="secondary" id="copy">複製結果</button><button class="secondary" id="down">下載 TXT</button><button class="secondary" id="restart">重新測一次</button>';
+document.getElementById('share').onclick=function(){shareResult(kind)};document.getElementById('copy').onclick=function(){copyResult(kind)};document.getElementById('down').onclick=function(){downloadResult(kind)};document.getElementById('restart').onclick=function(){location.reload()};
+}
+reading();
+})();
+</script>
+</body>
+</html>
