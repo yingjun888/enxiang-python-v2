@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="format-detection" content="telephone=no">
+<title>恩翔 Python V2｜四區塊完整診斷 V1</title>
+<style>
+:root{--bg:#f3f5f8;--card:#fff;--ink:#172033;--muted:#667085;--line:#d7dde7;--blue:#175cd3;--green:#087443;--amber:#9a6700;--red:#b42318}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC","Microsoft JhengHei",Arial,sans-serif;background:var(--bg);color:var(--ink)}
+body{padding-bottom:calc(84px + env(safe-area-inset-bottom))}
+.wrap{max-width:720px;margin:0 auto}.top{position:sticky;top:0;z-index:10;background:rgba(255,255,255,.98);border-bottom:1px solid var(--line);padding:calc(9px + env(safe-area-inset-top)) 12px 10px}
+.row{display:flex;align-items:center;gap:10px}.brand{font-weight:900;flex:1;font-size:16px}.timer{font-variant-numeric:tabular-nums;font-weight:800}.meta{display:flex;justify-content:space-between;color:var(--muted);font-size:12px;margin-top:6px}
+.track{height:6px;background:#e4e7ec;border-radius:999px;overflow:hidden;margin-top:7px}.fill{height:100%;background:var(--blue);width:0;transition:.2s}
+.main{padding:12px 10px 30px}.card,.result,.startCard{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 1px 3px rgba(16,24,40,.05)}
+.card{padding:16px 14px}.badge{display:inline-block;font-size:12px;font-weight:800;background:#eef4ff;color:#1849a9;border-radius:999px;padding:5px 8px}
+.qnum{font-size:13px;font-weight:800;color:#475467;margin-left:7px}.prompt{font-size:18px;line-height:1.5;font-weight:760;margin:12px 0}
+.code{background:#111827;color:#f9fafb;border-radius:12px;padding:12px;white-space:pre;overflow:auto;font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;margin:10px 0 14px}
+.option{display:flex;align-items:flex-start;gap:10px;width:100%;min-height:55px;border:1.5px solid #d0d5dd;background:#fff;border-radius:13px;padding:12px;margin:9px 0;text-align:left}
+.option.selected{border-color:var(--blue);background:#f5f8ff;box-shadow:0 0 0 1px var(--blue) inset}.option input{width:22px;height:22px;margin:0;accent-color:var(--blue)}.letter{font-weight:900;width:24px}.otext{font-size:16px;line-height:1.4}
+.diag{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}.diag button{min-height:44px;border-radius:11px;border:1px dashed #98a2b3;background:#f8fafc;color:#475467;font-weight:800}
+.diag button.active{border-style:solid;border-color:#f79009;background:#fff7e8;color:#8a5a00}.small{font-size:12px;line-height:1.5;color:var(--muted);margin-top:9px}
+.bottom{position:fixed;left:0;right:0;bottom:0;z-index:20;background:rgba(255,255,255,.98);border-top:1px solid var(--line);padding:9px 10px calc(9px + env(safe-area-inset-bottom))}
+.bottomIn{max-width:720px;margin:auto;display:grid;grid-template-columns:1fr 1.35fr;gap:9px}.nav{min-height:50px;border-radius:12px;border:1px solid #cfd5df;background:#fff;font-size:16px;font-weight:850}.nav.primary{background:var(--blue);color:#fff;border-color:var(--blue)}.nav:disabled{opacity:.4}
+.hidden{display:none!important}.start{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:18px}.startCard{max-width:560px;padding:22px 18px}.startCard h1{font-size:24px;margin:0 0 8px}.startCard p{line-height:1.6;color:#475467}.startCard button,.action button{width:100%;min-height:52px;border-radius:12px;border:1px solid #cfd5df;background:#fff;font-weight:850;margin-top:9px}.startCard button.primary,.action button.primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+.result{padding:18px 14px;margin:12px 10px 30px}.score{font-size:42px;font-weight:950;margin:6px 0}.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:12px 0}.kpi{border:1px solid var(--line);border-radius:12px;padding:11px;background:#fff}.kpi b{display:block;font-size:18px;margin-top:3px}.section{margin-top:18px;border-top:1px solid #eaecf0;padding-top:14px}.topicrow{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid #f2f4f7}.warn{background:#fff7e8;border:1px solid #f4c76b;border-radius:12px;padding:11px;line-height:1.5;color:#6b4b00}
+@media(max-width:480px){.diag{grid-template-columns:1fr}.prompt{font-size:17px}.grid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div id="start" class="start"><section class="startCard">
+<h1>恩翔 Python V2｜四區塊完整診斷 V1</h1>
+<p><b>32 題｜建議 30～40 分鐘</b><br>範圍：String、List、file mode、sequential search。<br><br>這不是重做 V2，而是把尚未完成診斷的四個區塊重新取樣。單選與複選混合；複選題請固定把 A、B、C、D 各自判斷 True / False 後再組答案。</p>
+<p>若真的卡住，不要亂猜：可標記「題意看不懂」或「觀念不知道」。這兩種會分開記錄。</p>
+<button id="newBtn" class="primary">開始新測驗</button>
+<button id="resumeBtn" class="hidden">繼續上次進度</button>
+<p class="small">計時採有效作答時間；切到背景、鎖屏或其他 App 時暫停。</p>
+</section></div>
+
+<div id="exam" class="wrap hidden">
+<header class="top"><div class="row"><div class="brand">Python V2 Gap Diagnostic</div><div id="clock" class="timer">00:00</div></div><div class="meta"><span id="progress">0 / 32</span><span id="pos">Q1 / 32</span></div><div class="track"><div id="fill" class="fill"></div></div></header>
+<main class="main"><section class="card"><div id="qbox"></div><div class="small" id="saveStatus"></div></section></main>
+<nav class="bottom"><div class="bottomIn"><button id="prev" class="nav">上一題</button><button id="next" class="nav primary">下一題</button></div></nav>
+</div>
+
+<section id="result" class="result hidden"></section>
+
+<script>
+(function(){
+const Q=[{"id":1,"topic":"String","skill":"slicing","type":"single","prompt":"What is returned by the expression?","code":"\"Python\"[1:4]","options":["Pyt","ytho","yth","Python"],"answer":[2]},{"id":2,"topic":"String","skill":"methods","type":"multi","prompt":"Select all that apply. Which are valid string methods?","code":null,"options":["lower()","append()","replace()","find()"],"answer":[0,2,3]},{"id":3,"topic":"String","skill":"immutability","type":"single","prompt":"What does it mean that Python strings are immutable?","code":null,"options":["Characters in an existing string object cannot be changed in place.","A string cannot be stored in a variable.","A string cannot contain spaces.","A string can only be read once."],"answer":[0]},{"id":4,"topic":"String","skill":"method return vs mutation","type":"single","prompt":"What is printed after execution?","code":"s = 'hello'\ns.upper()\nprint(s)","options":["HELLO","Hello","hello","An error occurs"],"answer":[2]},{"id":5,"topic":"String","skill":"negative indexing","type":"single","prompt":"What is printed?","code":"word = 'coding'\nprint(word[-2])","options":["i","n","g","d"],"answer":[1]},{"id":6,"topic":"String","skill":"len","type":"single","prompt":"What value is returned by len(text)?","code":"text = 'a b'","options":["2","3","4","1"],"answer":[1]},{"id":7,"topic":"String","skill":"replace and assignment","type":"single","prompt":"What is printed?","code":"s = 'cat'\nt = s.replace('c', 'h')\nprint(s, t)","options":["cat hat","hat hat","cat cat","hat cat"],"answer":[0]},{"id":8,"topic":"String","skill":"immutable operations","type":"multi","prompt":"Select all that apply. Which expressions create or return a new string without changing the original string s in place?","code":"s = 'Hi'","options":["s.upper()","s + '!'","s[0] = 'B'","s.replace('H', 'B')"],"answer":[0,1,3]},{"id":9,"topic":"List","skill":"insert","type":"single","prompt":"What is the value of nums after execution?","code":"nums = [1, 2, 3]\nnums.insert(1, 9)","options":["[1, 2, 9, 3]","[9, 1, 2, 3]","[1, 2, 3, 9]","[1, 9, 2, 3]"],"answer":[3]},{"id":10,"topic":"List","skill":"index bounds","type":"single","prompt":"Which operation is NOT valid for nums = [4, 5, 6]?","code":null,"options":["nums[3]","nums[-1]","nums[0]","nums[1:3]"],"answer":[0]},{"id":11,"topic":"List","skill":"in-place methods","type":"multi","prompt":"Select all that apply. Which operations modify a list in place?","code":null,"options":["sorted(nums)","nums.extend([4])","nums.sort()","nums.append(4)"],"answer":[1,2,3]},{"id":12,"topic":"List","skill":"slicing","type":"single","prompt":"What does nums[1:4] return?","code":"nums = [10, 20, 30, 40, 50]","options":["[10, 20, 30]","[20, 30, 40]","[20, 30, 40, 50]","[10, 20, 30, 40]"],"answer":[1]},{"id":13,"topic":"List","skill":"aliasing","type":"single","prompt":"What is printed?","code":"a = [1, 2]\nb = a\nb.append(3)\nprint(a)","options":["[1, 2]","[3]","[1, 2, 3]","An error occurs"],"answer":[2]},{"id":14,"topic":"List","skill":"append vs extend","type":"single","prompt":"What is printed?","code":"nums = [1, 2]\nnums.extend([3, 4])\nnums.append(5)\nprint(nums)","options":["[1, 2, [3, 4], 5]","[1, 2, 3, 4, 5]","[1, 2, 3, 4, [5]]","[1, 2, [3, 4, 5]]"],"answer":[1]},{"id":15,"topic":"List","skill":"pop","type":"single","prompt":"What is printed?","code":"nums = [7, 8, 9]\nx = nums.pop(1)\nprint(x, nums)","options":["7 [8, 9]","8 [7, 9]","8 [7, 8, 9]","9 [7, 8]"],"answer":[1]},{"id":16,"topic":"List","skill":"copy vs alias","type":"multi","prompt":"Select all that apply. After this code runs, which statements are true?","code":"a = [1, 2]\nb = a[:]\nb.append(3)","options":["a is [1, 2]","b is [1, 2, 3]","a and b refer to the same list object","Changing b with append(3) also changes a"],"answer":[0,1]},{"id":17,"topic":"file mode","skill":"mode \"r\"","type":"multi","prompt":"Select all that apply. Which statements about file mode \"r\" are valid?","code":null,"options":["It opens a file for reading.","The file normally needs to already exist.","It does not normally erase the file contents.","It appends new text at the end."],"answer":[0,1,2]},{"id":18,"topic":"file mode","skill":"mode \"w\"","type":"single","prompt":"What is a key effect of opening an existing file with mode \"w\"?","code":null,"options":["Old contents are kept and new text is added at the end.","The file becomes read-only.","Old contents are replaced when the file is opened for writing.","The file must already be empty."],"answer":[2]},{"id":19,"topic":"file mode","skill":"mode \"a\"","type":"single","prompt":"Which mode should be used to add new text at the end without deleting existing contents?","code":null,"options":["\"r\"","\"w\"","\"a\"","\"rw\""],"answer":[2]},{"id":20,"topic":"file mode","skill":"read vs write modes","type":"multi","prompt":"Considering only modes \"r\", \"w\", and \"a\", which modes allow writing?","code":null,"options":["\"w\"","\"r\"","\"a\"","None of them"],"answer":[0,2]},{"id":21,"topic":"file mode","skill":"create if missing","type":"single","prompt":"Considering only \"r\", \"w\", and \"a\", which pair can create a file if it does not already exist?","code":null,"options":["\"r\" and \"w\"","\"w\" and \"a\"","\"r\" and \"a\"","Only \"r\""],"answer":[1]},{"id":22,"topic":"file mode","skill":"w then a effect","type":"single","prompt":"Assume note.txt does not exist before this code runs. What will note.txt contain at the end?","code":"f = open('note.txt', 'w')\nf.write('A')\nf.close()\n\nf = open('note.txt', 'a')\nf.write('B')\nf.close()","options":["A","B","AB","BA"],"answer":[2]},{"id":23,"topic":"file mode","skill":"truncate","type":"single","prompt":"Assume note.txt initially contains OLD. After this code runs, what does the file contain?","code":"f = open('note.txt', 'w')\nf.write('NEW')\nf.close()","options":["OLDNEW","NEWOLD","OLD","NEW"],"answer":[3]},{"id":24,"topic":"file mode","skill":"append","type":"multi","prompt":"Assume log.txt already exists and contains START. Which statements are true after opening it with mode 'a' and writing END?","code":"f = open('log.txt', 'a')\nf.write('END')\nf.close()","options":["The old text START is kept.","END is added after the old text.","The file is erased before END is written.","The final content is STARTEND."],"answer":[0,1,3]},{"id":25,"topic":"sequential search","skill":"basic properties","type":"multi","prompt":"Select all that apply. Which statements describe a basic sequential search?","code":null,"options":["It checks items one by one.","It must begin at the middle item.","It can be used on an unsorted list.","It can stop when the target is found."],"answer":[0,2,3]},{"id":26,"topic":"sequential search","skill":"first match","type":"single","prompt":"If a sequential search stops at the first match, what index is returned?","code":"data = [5, 8, 8, 2]\ntarget = 8","options":["0","1","2","3"],"answer":[1]},{"id":27,"topic":"sequential search","skill":"early return bug","type":"single","prompt":"Why is the function below incorrect for many searches?","code":"def find_item(data, target):\n    for i in range(len(data)):\n        if data[i] == target:\n            return i\n        return -1","options":["The loop variable must be a string.","It returns -1 after checking only the first non-matching item.","range() cannot be used with len().","A function cannot return an index."],"answer":[1]},{"id":28,"topic":"sequential search","skill":"worst case","type":"single","prompt":"In the worst case, how many comparisons may a sequential search make in a list of n items?","code":null,"options":["1","log n","n","n / 2 exactly"],"answer":[2]},{"id":29,"topic":"sequential search","skill":"not found placement","type":"single","prompt":"Where should return -1 usually be placed if -1 means 'target not found'?","code":"def find_item(data, target):\n    for i in range(len(data)):\n        if data[i] == target:\n            return i\n    # return -1 goes here","options":["Inside the if block","Inside the loop before the if","After the loop finishes","Before the loop starts"],"answer":[2]},{"id":30,"topic":"sequential search","skill":"trace comparisons","type":"single","prompt":"How many list items are checked before this function returns?","code":"def find_item(data, target):\n    for i in range(len(data)):\n        if data[i] == target:\n            return i\n    return -1\n\nfind_item([3, 1, 4, 1], 1)","options":["1","2","3","4"],"answer":[1]},{"id":31,"topic":"sequential search","skill":"duplicates","type":"single","prompt":"What does the function return?","code":"def find_item(data, target):\n    for i in range(len(data)):\n        if data[i] == target:\n            return i\n    return -1\n\nfind_item([4, 2, 4, 2], 4)","options":["0","1","2","3"],"answer":[0]},{"id":32,"topic":"sequential search","skill":"strategy integration","type":"multi","prompt":"Select all that apply. Which statements are true about a basic sequential search?","code":null,"options":["It may need to check every item.","The list must be sorted first.","It can return as soon as the first match is found.","If the target is absent, every item may be checked."],"answer":[0,2,3]}];
+const KEY="enxiang_py_gapdiag_20260929_v1";
+let state={answers:Array(Q.length).fill(null),unknown:Array(Q.length).fill(null),times:Array(Q.length).fill(0),idx:0,started:null,finished:null};
+let visibleStart=null,timerInt=null;
+const $=id=>document.getElementById(id);
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function fmt(sec){sec=Math.max(0,Math.round(sec));return String(Math.floor(sec/60)).padStart(2,'0')+":"+String(sec%60).padStart(2,'0');}
+function totalTime(){return state.times.reduce((a,b)=>a+b,0)+(visibleStart?((Date.now()-visibleStart)/1000):0);}
+function save(){localStorage.setItem(KEY,JSON.stringify(state));$("saveStatus").textContent="已自動保存｜本題有效時間 "+fmt(state.times[state.idx]+(visibleStart?((Date.now()-visibleStart)/1000):0));}
+function load(){try{const x=JSON.parse(localStorage.getItem(KEY)||"null");if(x&&Array.isArray(x.answers)&&x.answers.length===Q.length)state=x;}catch(e){}}
+function commitTime(){if(visibleStart){state.times[state.idx]+=(Date.now()-visibleStart)/1000;visibleStart=null;}}
+function resumeTime(){if(!document.hidden&&!state.finished)visibleStart=Date.now();}
+document.addEventListener("visibilitychange",()=>{if(document.hidden){commitTime();save();}else{resumeTime();}});
+function answeredCount(){return state.answers.filter((a,i)=>a!==null||state.unknown[i]!==null).length;}
+function render(){
+ commitTime(); resumeTime();
+ const q=Q[state.idx], multi=q.type==="multi", chosen=state.answers[state.idx]||[];
+ let h='<div><span class="badge">'+esc(q.topic)+'｜'+esc(q.skill)+'</span><span class="qnum">Q'+q.id+(multi?'｜複選':'｜單選')+'</span></div>';
+ h+='<div class="prompt">'+esc(q.prompt)+'</div>';
+ if(q.code)h+='<div class="code">'+esc(q.code)+'</div>';
+ h+='<div>';
+ q.options.forEach((o,i)=>{const sel=chosen.includes(i);h+='<button class="option '+(sel?'selected':'')+'" data-opt="'+i+'"><input tabindex="-1" type="'+(multi?'checkbox':'radio')+'" '+(sel?'checked':'')+'><span class="letter">'+String.fromCharCode(65+i)+'.</span><span class="otext">'+esc(o)+'</span></button>';});
+ h+='</div><div class="diag"><button id="uRead" class="'+(state.unknown[state.idx]==="reading"?'active':'')+'">題意看不懂</button><button id="uConcept" class="'+(state.unknown[state.idx]==="concept"?'active':'')+'">觀念不知道</button></div>';
+ h+='<div class="small">若選擇「不懂」，該題不計為猜答；之後 Guided Correction 會用不同路徑處理。</div>';
+ $("qbox").innerHTML=h;
+ document.querySelectorAll("[data-opt]").forEach(btn=>btn.onclick=()=>{
+   const i=Number(btn.dataset.opt); state.unknown[state.idx]=null;
+   if(multi){let arr=state.answers[state.idx]||[]; arr=arr.includes(i)?arr.filter(x=>x!==i):arr.concat(i).sort((a,b)=>a-b); state.answers[state.idx]=arr.length?arr:null;}
+   else state.answers[state.idx]=[i];
+   save();render();
+ });
+ $("uRead").onclick=()=>{state.answers[state.idx]=null;state.unknown[state.idx]=state.unknown[state.idx]==="reading"?null:"reading";save();render();};
+ $("uConcept").onclick=()=>{state.answers[state.idx]=null;state.unknown[state.idx]=state.unknown[state.idx]==="concept"?null:"concept";save();render();};
+ $("progress").textContent=answeredCount()+" / "+Q.length;$("pos").textContent="Q"+(state.idx+1)+" / "+Q.length;$("fill").style.width=((state.idx+1)/Q.length*100)+"%";
+ $("prev").disabled=state.idx===0;$("next").textContent=state.idx===Q.length-1?"交卷":"下一題";
+ save();
+}
+function next(){
+ const has=state.answers[state.idx]!==null||state.unknown[state.idx]!==null;
+ if(!has){alert("請先作答，或標記「題意看不懂／觀念不知道」。");return;}
+ if(state.idx===Q.length-1){submit();return;}
+ commitTime();state.idx++;save();render();
+}
+function prev(){if(state.idx>0){commitTime();state.idx--;save();render();}}
+function exact(a,b){if(!a||a.length!==b.length)return false;return a.every((v,i)=>v===b[i]);}
+function calc(){
+ const rows=Q.map((q,i)=>({id:q.id,topic:q.topic,skill:q.skill,type:q.type,answer:state.answers[i],correct:q.answer,unknown:state.unknown[i],seconds:Math.round(state.times[i]),ok:state.unknown[i]===null&&exact(state.answers[i],q.answer)}));
+ const topics={}; let correct=0,multiCorrect=0,multiTotal=0;
+ rows.forEach(r=>{if(!topics[r.topic])topics[r.topic]={n:0,c:0,unknown:0,time:0};topics[r.topic].n++;topics[r.topic].time+=r.seconds;if(r.ok){topics[r.topic].c++;correct++;}if(r.unknown)topics[r.topic].unknown++;if(r.type==="multi"){multiTotal++;if(r.ok)multiCorrect++;}});
+ return {rows,topics,correct,multiCorrect,multiTotal,total:Q.length};
+}
+function submit(){
+ if(answeredCount()<Q.length){alert("尚有 "+(Q.length-answeredCount())+" 題未作答／未標記。");return;}
+ if(!confirm("確定交卷？交卷後會顯示診斷結果。"))return;
+ commitTime();state.finished=Date.now();save();clearInterval(timerInt);showResult();
+}
+function makeShare(r){
+ const unknownReading=r.rows.filter(x=>x.unknown==="reading").map(x=>"Q"+x.id);
+ const unknownConcept=r.rows.filter(x=>x.unknown==="concept").map(x=>"Q"+x.id);
+ const wrong=r.rows.filter(x=>!x.ok&&!x.unknown).map(x=>"Q"+x.id);
+ const slow=[...r.rows].sort((a,b)=>b.seconds-a.seconds).slice(0,8).map(x=>"Q"+x.id+" "+x.seconds+"s");
+ let t="【恩翔 Python V2 四區塊診斷】\n";
+ t+="總分："+r.correct+"/"+r.total+"（"+Math.round(r.correct/r.total*100)+"%）\n";
+ t+="有效作答時間："+fmt(state.times.reduce((a,b)=>a+b,0))+"\n";
+ t+="複選："+r.multiCorrect+"/"+r.multiTotal+"\n\n";
+ Object.keys(r.topics).forEach(k=>{const x=r.topics[k];t+=k+"："+x.c+"/"+x.n+"｜不懂 "+x.unknown+"\n";});
+ t+="\n題意看不懂："+(unknownReading.length?unknownReading.join("、"):"無");
+ t+="\n觀念不知道："+(unknownConcept.length?unknownConcept.join("、"):"無");
+ t+="\n作答錯誤："+(wrong.length?wrong.join("、"):"無");
+ t+="\n最慢8題："+slow.join("、");
+ return t;
+}
+function showResult(){
+ $("start").classList.add("hidden");$("exam").classList.add("hidden");
+ const r=calc(); const pct=Math.round(r.correct/r.total*100);
+ let h='<h2>四區塊診斷完成</h2><div class="score">'+r.correct+' / '+r.total+'</div><div class="small">'+pct+'%｜有效作答時間 '+fmt(state.times.reduce((a,b)=>a+b,0))+'</div>';
+ h+='<div class="grid"><div class="kpi">複選正確<b>'+r.multiCorrect+' / '+r.multiTotal+'</b></div><div class="kpi">不懂標記<b>'+r.rows.filter(x=>x.unknown).length+'</b></div></div>';
+ h+='<div class="section"><b>各區塊</b>';
+ Object.keys(r.topics).forEach(k=>{const x=r.topics[k],p=Math.round(x.c/x.n*100);h+='<div class="topicrow"><span>'+esc(k)+'</span><b>'+x.c+'/'+x.n+'（'+p+'%）</b></div>';});
+ h+='</div>';
+ const weak=Object.entries(r.topics).sort((a,b)=>(a[1].c/a[1].n)-(b[1].c/b[1].n)).map(([k,v])=>k+" "+v.c+"/"+v.n);
+ h+='<div class="section"><div class="warn"><b>下一步不是重做整份。</b><br>依序從最低區塊進 Guided Correction；每次只挑一題走：提示 → 更小問題 → 微教學 → 原題 → Transfer → delayed retest。<br><br>目前由低到高：'+esc(weak.join(" → "))+'</div></div>';
+ h+='<div class="action"><button id="lineBtn" class="primary">用 LINE 傳送結果</button><button id="jsonBtn">下載完整 JSON</button><button id="restartBtn">重新開始一份新測驗</button></div>';
+ $("result").innerHTML=h;$("result").classList.remove("hidden");
+ $("lineBtn").onclick=()=>{const txt=makeShare(r);location.href="https://line.me/R/msg/text/?"+encodeURIComponent(txt);};
+ $("jsonBtn").onclick=()=>{const payload={version:"PY_V2_GAP_DIAG_20260929_V1",completed:new Date(state.finished).toISOString(),result:r,state};const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="EnXiang_Python_V2_Gap_Diagnostic_Result.json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);};
+ $("restartBtn").onclick=()=>{if(confirm("確定清除這次結果並重新開始？")){localStorage.removeItem(KEY);location.reload();}};
+}
+function begin(newOne){
+ if(newOne){state={answers:Array(Q.length).fill(null),unknown:Array(Q.length).fill(null),times:Array(Q.length).fill(0),idx:0,started:Date.now(),finished:null};save();}
+ $("start").classList.add("hidden");$("result").classList.add("hidden");$("exam").classList.remove("hidden");render();timerInt=setInterval(()=>{$("clock").textContent=fmt(totalTime());$("saveStatus").textContent="已自動保存｜本題有效時間 "+fmt(state.times[state.idx]+(visibleStart?((Date.now()-visibleStart)/1000):0));},1000);
+}
+$("newBtn").onclick=()=>begin(true);$("resumeBtn").onclick=()=>begin(false);$("prev").onclick=prev;$("next").onclick=next;
+load();
+if(state.finished){$("resumeBtn").classList.remove("hidden");$("resumeBtn").textContent="查看上次結果";$("resumeBtn").onclick=()=>showResult();}
+else if(state.started){$("resumeBtn").classList.remove("hidden");}
+})();
+</script>
+</body></html>
