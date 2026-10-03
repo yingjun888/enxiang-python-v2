@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>恩翔 Python V2 四區塊弱點導正</title>
+<style>
+:root{--bg:#f5f7fb;--card:#fff;--ink:#18212f;--muted:#667085;--line:#dbe2ea;--accent:#2563eb;--good:#087f5b;--warn:#b54708}
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif;background:var(--bg);color:var(--ink);line-height:1.7}
+header{padding:28px 18px;background:#172554;color:white}.wrap{max-width:820px;margin:auto}.tag{display:inline-block;padding:4px 10px;border-radius:999px;background:#dbeafe;color:#1e40af;font-weight:700;font-size:13px}
+nav{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:18px 0}nav a{background:white;border:1px solid var(--line);padding:10px;text-align:center;border-radius:10px;text-decoration:none;color:var(--ink);font-weight:700}
+main{padding:18px}.chapter,.lesson{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;margin:16px 0;box-shadow:0 2px 8px #00000008}
+h2{margin-top:0}h3{margin-bottom:6px}.goal{color:var(--muted)}pre{background:#101828;color:#f2f4f7;padding:16px;border-radius:12px;overflow:auto;font-size:15px;line-height:1.55}
+.trace{background:#eef4ff;border-left:4px solid var(--accent);padding:12px 14px;border-radius:8px;margin:10px 0}.remember{background:#ecfdf3;border-left:4px solid var(--good);padding:12px 14px;border-radius:8px;font-weight:700}.mistake{background:#fff4e5;border-left:4px solid var(--warn);padding:12px 14px;border-radius:8px}
+button{border:0;border-radius:10px;background:var(--accent);color:white;padding:10px 14px;font-size:15px;font-weight:700}.reveal{display:none;margin-top:10px}.mini{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}.footer{color:var(--muted);font-size:14px;padding:25px 0}
+@media(max-width:620px){nav{grid-template-columns:1fr 1fr}header h1{font-size:25px}.chapter,.lesson{padding:16px}}
+</style>
+</head>
+<body>
+<header><div class="wrap"><span class="tag">TEACHING / GUIDED CORRECTION</span><h1>Python V2 四區塊弱點導正</h1><p>這不是考試，不計分。目的只有一個：看懂「電腦每一行到底做了什麼」。</p></div></header>
+<main class="wrap">
+<div class="chapter">
+<h2>先學一個方法：不要猜輸出，跟著電腦走</h2>
+<p>看到 Python 程式時，先不要急著想答案。每執行一行，就問自己三件事：<b>現在有哪些資料？這一行改了什麼？下一行看到的是改過後的什麼？</b></p>
+<div class="remember">一句話記：Python 不會「想」，只會照順序執行。你也照順序追，就比較不會猜錯。</div>
+</div>
+<nav><a href="#string">String</a><a href="#list">List</a><a href="#file">file mode</a><a href="#search">Sequential Search</a></nav>
+
+<section id="string" class="chapter"><h2>第 1 章｜String 字串</h2><p class="goal">重點：索引、切片、len、字串不可直接改某一格。</p>
+<div class="lesson"><h3>1. 索引：電腦從 0 開始數</h3>
+<pre>s = "Python"
+print(s[2])</pre>
+<div class="trace"><span class="mini">P y t h o n<br>0 1 2 3 4 5</span><br>先建立字串 Python。<br><code>s[2]</code> 找 index 2，所以拿到 <b>t</b>。</div>
+<button onclick="toggle(this)">看正確結果與原因</button><div class="reveal"><p><b>輸出：t</b></p><div class="mistake">容易錯：把 index 2 當成「第 2 個字」。Python 的第一格是 index 0，所以第 3 個字才是 index 2。</div><div class="remember">一句話記：索引從 0 開始。</div></div></div>
+
+<div class="lesson"><h3>2. 切片：左邊拿，右邊不拿</h3>
+<pre>s = "Python"
+print(s[1:4])</pre>
+<div class="trace"><span class="mini">P y t h o n<br>0 1 2 3 4 5</span><br>從 index 1 開始：y。接著 t、h。到了 index 4 就停止，<b>4 本身不拿</b>。</div>
+<button onclick="toggle(this)">看正確結果與原因</button><div class="reveal"><p><b>輸出：yth</b></p><div class="mistake">容易錯：以為 1:4 包含 index 4，所以寫成 ytho。</div><div class="remember">一句話記：[開始:結束]＝左邊拿，右邊不拿。</div></div></div>
+
+<div class="lesson"><h3>3. len() 算的是「有幾個」</h3>
+<pre>word = "apple"
+print(len(word))</pre>
+<div class="trace">a、p、p、l、e，一共 5 個字元，所以 len(word) 是 5。注意：最後一個 index 是 4，但長度是 5。</div>
+<button onclick="toggle(this)">看重點</button><div class="reveal"><div class="remember">一句話記：len 是數量；index 是位置。長度 5 的字串，最後位置是 4。</div></div></div>
+
+<div class="lesson"><h3>4. String 不能直接改其中一格</h3>
+<pre>s = "cat"
+s[0] = "b"</pre>
+<div class="trace">第二行想把 c 直接改成 b，但 Python 的 string 是 immutable（不可變物件），不能用索引直接改某一個字元。</div>
+<button onclick="toggle(this)">那要怎麼改？</button><div class="reveal"><pre>s = "cat"
+s = "b" + s[1:]
+print(s)</pre><p>先取出 <code>s[1:]</code> 得到 at，再建立新的字串 bat，最後讓 s 指向新字串。</p><div class="remember">一句話記：String 可以做出新的，但不能直接改原本某一格。</div></div></div>
+</section>
+
+<section id="list" class="chapter"><h2>第 2 章｜List 串列</h2><p class="goal">重點：List 可以改、append 會改原 List、索引與切片規則和 String 很像。</p>
+<div class="lesson"><h3>1. List 可以直接修改某一格</h3>
+<pre>a = [10, 20, 30]
+a[1] = 99
+print(a)</pre>
+<div class="trace">建立 [10,20,30] → index 1 是 20 → 把這一格改成 99 → 原本的 a 已經變了。</div>
+<button onclick="toggle(this)">看正確結果</button><div class="reveal"><p><b>[10, 99, 30]</b></p><div class="remember">一句話記：String 某一格不能直接改；List 某一格可以改。</div></div></div>
+
+<div class="lesson"><h3>2. append() 是加到原 List 最後面</h3>
+<pre>a = [10, 20]
+a.append(30)
+print(a)</pre>
+<div class="trace">執行前：a → [10,20]<br>append(30) 後：a → [10,20,30]</div>
+<button onclick="toggle(this)">看最容易混淆的地方</button><div class="reveal"><pre>a = [10, 20]
+a + [30]
+print(a)</pre><p>這一版最後仍是 <b>[10,20]</b>。因為 <code>a + [30]</code> 產生了新 List，但沒有把新結果存回 a。</p><div class="remember">一句話記：append 直接改原 List；+ 產生新 List。</div></div></div>
+
+<div class="lesson"><h3>3. remove() 和 pop() 不要混</h3>
+<pre>a = [10, 20, 30]
+a.remove(20)</pre>
+<div class="trace"><code>remove(20)</code> 是找「值 20」並移除它。若是 <code>pop(1)</code>，1 是位置 index，會移除 index 1 的元素並回傳它。</div>
+<div class="remember">一句話記：remove 看「值」；pop 看「位置」。</div></div>
+</section>
+
+<section id="file" class="chapter"><h2>第 3 章｜file mode 檔案模式</h2><p class="goal">重點：r / w / a 不是三個英文單字而已，要看「原檔案會發生什麼事」。</p>
+<div class="lesson"><h3>1. r = read：只讀</h3><pre>f = open("note.txt", "r")
+text = f.read()
+f.close()</pre><div class="trace">打開 note.txt → 讀內容 → 存到 text → 關檔。原本檔案內容不因為 read 被改掉。</div><div class="remember">r：我要讀，原資料保留。</div></div>
+<div class="lesson"><h3>2. w = write：重新寫</h3><p>假設 note.txt 原本是：</p><pre>apple
+banana</pre><pre>f = open("note.txt", "w")
+f.write("cat")
+f.close()</pre><button onclick="toggle(this)">看檔案變化</button><div class="reveal"><div class="trace">用 w 開啟既有檔案時，原內容會被截斷；寫入後內容成為：<br><b>cat</b></div><div class="mistake">這是最需要小心的模式：不是「在後面寫」，而是準備重寫。</div><div class="remember">w：重寫；舊內容可能消失。</div></div></div>
+<div class="lesson"><h3>3. a = append：接在最後</h3><p>同樣假設原檔案有 apple、banana：</p><pre>f = open("note.txt", "a")
+f.write("\ncat")
+f.close()</pre><div class="trace">原內容保留，cat 接到最後。<br><span class="mini">apple<br>banana<br>cat</span></div><div class="remember">a：追加；舊內容留下來。</div></div>
+<div class="lesson"><h3>4. 三個模式放在一起看</h3><p><b>r</b>：讀，不負責新增內容。<br><b>w</b>：重新寫，既有內容可能被清掉。<br><b>a</b>：在最後追加，既有內容保留。</p><div class="remember">一句話記：r 讀、w 重寫、a 往後加。先想「舊資料要不要保留」，再選模式。</div></div>
+</section>
+
+<section id="search" class="chapter"><h2>第 4 章｜Sequential Search 循序搜尋</h2><p class="goal">重點：不要先背程式。先理解「從第一個開始，一個一個比較」。</p>
+<div class="lesson"><h3>1. 人怎麼找，電腦就怎麼找</h3><p>在 <code>[8, 3, 12, 5, 9]</code> 中找 5：</p>
+<div class="trace"><b>8 ✗ → 3 ✗ → 12 ✗ → 5 ✓ → STOP</b></div><p>這就是 sequential search。它沒有瞬間知道 5 在哪裡，而是照順序檢查。</p><div class="remember">一句話記：從頭開始，一個一個比，找到就停。</div></div>
+
+<div class="lesson"><h3>2. 把人的動作翻成 Python</h3>
+<pre>nums = [8, 3, 12, 5, 9]
+target = 5
+
+for x in nums:
+    if x == target:
+        print("found")
+        break</pre>
+<div class="trace">x=8 → 不是 5，繼續。<br>x=3 → 不是 5，繼續。<br>x=12 → 不是 5，繼續。<br>x=5 → 相等，印 found → break 結束迴圈。</div>
+<div class="remember">break 的意思：已經找到，不需要繼續找後面的資料。</div></div>
+
+<div class="lesson"><h3>3. 如果題目要的是「位置」</h3>
+<pre>nums = [8, 3, 12, 5, 9]
+target = 5
+
+for i in range(len(nums)):
+    if nums[i] == target:
+        print(i)
+        break</pre>
+<div class="trace">i 代表位置：0、1、2、3……<br>nums[i] 才是那個位置裡面的值。當 i=3 時，nums[3]=5，所以輸出 3。</div>
+<div class="mistake">容易錯：把 i 和 nums[i] 當成同一件事。i 是「位置」；nums[i] 是「那個位置的資料」。</div><div class="remember">一句話記：i 是格子號碼；nums[i] 是格子裡的東西。</div></div>
+
+<div class="lesson"><h3>4. 沒找到時，為什麼要用 found？</h3>
+<pre>nums = [8, 3, 12]
+target = 5
+found = False
+
+for x in nums:
+    if x == target:
+        found = True
+        break
+
+if found:
+    print("找到")
+else:
+    print("沒找到")</pre>
+<div class="trace">一開始先假設沒找到：False。只有真的遇到 target 才改成 True。整個搜尋結束後，再看 found 的狀態決定輸出。</div><div class="remember">一句話記：found 像一面旗子；找到就把旗子從 False 翻成 True。</div></div>
+</section>
+
+<div class="chapter"><h2>最後只記這 8 句</h2>
+<p>① index 從 0 開始。<br>② slice 左邊拿、右邊不拿。<br>③ len 是數量，不是最後一個 index。<br>④ String 不能直接改某一格，List 可以。<br>⑤ append 會改原 List。<br>⑥ r 讀、w 重寫、a 追加。<br>⑦ Sequential Search 從頭一個一個找。<br>⑧ i 是位置，list[i] 是位置裡的資料。</p>
+<p><b>今天不用證明自己會。先把「電腦怎麼走」看懂，就完成這份教材的目的。</b></p></div>
+<div class="footer">依 2026-09-28 Python V2 四區塊診斷建立。狀態：TEACHING / GUIDED CORRECTION / NOT TESTED。此頁不計分、不代表已掌握。</div>
+</main>
+<script>
+function toggle(btn){const box=btn.nextElementSibling;const open=box.style.display==="block";box.style.display=open?"none":"block";btn.textContent=open?"看正確結果與原因":"收起說明";}
+</script>
+</body></html>
