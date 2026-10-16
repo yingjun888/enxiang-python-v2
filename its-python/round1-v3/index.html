@@ -34,7 +34,11 @@ header{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid 
 <p class="muted">題幹以 ITS 英文呈現；可按「查看中文題意」協助讀題，系統會記錄是否使用翻譯。複選題需要 <b>A、B、C、D 各自判斷對／錯</b>。真的不懂可以選「題意看不懂」或「觀念不知道」，不強迫猜。</p>
 <p class="muted">前一份 Git 基準：2026/09/28 Python V2 14/50（28%）；初測複選 3/20。弱點是診斷優先順序，不代表這次能力仍是 28%。</p>
 <div class="buttons"><button class="btn primary" id="startBtn">開始／繼續第 1 回</button><button class="btn" id="resetBtn">清除本機紀錄重新開始</button></div>
-<p class="small" id="homeStatus"></p>
+<div class="review-panel"><b>已經用舊版 V2 做完20題，但目前這個瀏覽器沒有讀到紀錄？</b>
+<p class="small">同一手機瀏覽器會自動讀取；若換了瀏覽器或裝置，可匯入第1回下載的原始 JSON。只有確認20題已提交的相同題本，才會開啟訂正；不必重新考一次。</p>
+<label style="display:block;font-weight:800" for="importFirstResult">匯入第1回原始作答 JSON</label>
+<input type="file" accept=".json,application/json" id="importFirstResult" style="max-width:100%;padding:12px 0">
+</div><p class="small" id="homeStatus"></p>
 </section>
 <section class="card hide" id="exam"><div class="qline"><span class="badge" id="chapterBadge"></span><span class="badge" id="skillBadge"></span><span class="muted" id="qNumber"></span></div><div class="question" id="stem"></div><div style="margin:12px 0"><button class="btn softer" id="zhBtn" type="button">查看中文題意（記錄輔助）</button><div class="translation hide" id="zhText"></div></div><pre class="code hide" id="code"></pre><div id="options"></div><div class="diag"><button class="btn" data-unknown="english">題意看不懂</button><button class="btn" data-unknown="concept">觀念不知道</button><button class="btn" data-unknown="unsure">只能猜／不確定</button></div><p class="small" id="saveInfo"></p></section>
 <section class="card hide" id="endRound"><h2 id="roundTitle"></h2><div class="flexgrid" id="roundStats"></div><p class="notice">完成20題逐題訂正後才會來到此畫面；每題已顯示正解及解析並留存孩子的核對紀錄，仍須六連問及延遲回測。本回答對不等於長期掌握。結果保留在此手機內；請按「手機分享完整結果」將 JSON 交給家長，再進入已對應的六連問。其餘弱點與下一批20題，待分析結果後增量製作；不會提前假稱已自適應完成。</p><div class="action-row"><button class="btn primary" id="nextRound">下一回（20 題）</button><button class="btn" id="exportBtn">下載 JSON 證據</button><button class="btn primary" id="shareBtn">手機分享完整結果（LINE）</button><button class="btn" id="copyBtn">複製家長摘要</button><button class="btn" id="reviewBtn">顯示本回逐題訂正</button><button class="btn softer" id="reviewDownloadBtn">下載逐題訂正 JSON</button><button class="btn primary" id="reviewShareBtn">分享逐題訂正 JSON</button></div><div id="review" class="hide"></div></section>
@@ -246,6 +250,32 @@ async function shareReview(){
 }
 $('reviewDownloadBtn').onclick=downloadReview;
 $('reviewShareBtn').onclick=shareReview;
+/* Restore a prior V2 result when opening the page in a different browser/device. */
+$('importFirstResult').addEventListener('change',async e=>{
+ const file=e.target.files?.[0];if(!file)return;
+ try{
+  const d=JSON.parse(await file.text());
+  if(d.webRelease!=='ITS_WEB_20_R1_V2'||!d.state||!d.state.roundSubmitted?.includes(0))
+   throw new Error('不是已提交的第1回 Web V2 原始結果。');
+  if(!Array.isArray(d.questions)||!BATCHES[0].every(id=>{
+    const expected=qById[id],v=d.questions.find(x=>x.id===id),resp=d.state.responses?.[id];
+    if(!v||!resp?.done)return false;
+    return v.section===expected.sec&&v.type===expected.kind&&
+     JSON.stringify(v.answer)===JSON.stringify(expected.ans)&&
+     v.initialCorrect===correct(expected,resp);
+  }))throw new Error('題號、標準答案或學生首次作答資料不符合第1回題本。');
+  if(!Array.isArray(d.state.history)||typeof d.state.started!=='string')throw new Error('作答歷史欄位不完整。');
+  if(!state.roundSubmitted.includes(0)&&Object.values(state.responses).some(x=>x.done)&&
+    !confirm('本瀏覽器尚有未提交的作答，匯入會以完整舊成績取代本機草稿。仍要匯入？'))return;
+  state=d.state;
+  localStorage.setItem(KEY,JSON.stringify(state));
+  localStorage.setItem(BRIDGE_KEY,JSON.stringify(d));
+  reviewState=null;
+  $('homeStatus').textContent='已匯入完整首答成績，可接續20題逐題訂正。';
+  startReview();
+ }catch(err){alert('匯入失敗：'+err.message+'。請使用本次第1回正式測驗匯出的 JSON，勿重新作答。');}
+ finally{e.target.value='';}
+});
 /* If original test submitted in V2 on the same browser, force review immediately on V3. */
 if(state.roundSubmitted.includes(0)){roundResult();}
 </script></body></html>
