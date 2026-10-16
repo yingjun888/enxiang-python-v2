@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#174ea6"><title>恩翔 ITS Python｜手機複習入口</title>
+<meta name="theme-color" content="#174ea6"><title>恩翔 ITS Python｜手機複習入口｜V4 同頁整合</title>
 <style>
 :root{--bg:#eff4fa;--paper:#fff;--ink:#14263e;--muted:#526276;--blue:#205bb8;--green:#12724c;--line:#dce4ee}
 *{box-sizing:border-box}html,body{min-height:100%;margin:0}body{font-family:system-ui,-apple-system,"Microsoft JhengHei","Noto Sans TC",sans-serif;color:var(--ink);background:var(--bg);line-height:1.6}main{max-width:680px;margin:auto;padding:18px 14px 44px}
@@ -8,26 +8,19 @@ header{padding:22px 4px 12px}h1{margin:6px 0;font-size:26px;line-height:1.3}h2{m
 .badge{display:inline-block;border-radius:30px;background:#eaf2ff;color:#174b9a;font-weight:800;font-size:12px;padding:4px 9px}.btn{display:block;text-align:center;text-decoration:none;color:#fff;background:var(--blue);font-weight:900;font-size:17px;padding:15px 14px;border-radius:12px;margin:14px 0 4px;min-height:52px}.btn.secondary{background:#eff5ff;color:#1a4c9f;border:1px solid #adc5ee}.btn:focus-visible{outline:3px solid #77aaff;outline-offset:3px}
 .step{display:grid;grid-template-columns:34px 1fr;gap:9px;padding:10px 0;border-bottom:1px solid #eef1f6}.step:last-child{border:0}.num{width:31px;height:31px;border-radius:9px;background:#e6eeff;color:#1f53ac;font-weight:900;display:grid;place-items:center}.small{color:var(--muted);font-size:13px}.notice{border-left:4px solid var(--green);padding:9px 12px;background:#f1fbf6;border-radius:7px}.foot{margin-top:22px;font-size:12px;color:var(--muted)}
 @media(max-width:430px){h1{font-size:23px}.card{padding:16px}}
-</style></head><body><main><header><div class="tag">EN-XIANG · PYTHON ITS</div><h1>老師重點講義｜手機複習</h1><p class="sub">20 題一回、錯題六連問、再依結果決定下一批。<br>不用安裝 App，也不必先下載 HTML。</p></header>
-<section class="card"><span class="badge">STEP 1 · 現在可做</span><h2 style="margin-top:9px">第1回：20題初測</h2><p>六章混合取樣，優先觀察 <b>String、List、file mode、while、例外處理</b>，同時測尚未充分覆蓋的概念。</p><div class="notice" id="status">正在檢查本機作答進度…</div><a class="btn" href="./round1-v3/">開始／繼續20題；已交卷者進入訂正 →</a><div class="small">手機會自動保存本機進度。請用同一個手機瀏覽器接續。</div></section>
-<section class="card"><span class="badge">STEP 2 · 清楚分流：訂正完成才開始六連問</span><h2 style="margin-top:9px">逐題閱讀正解 → 錯題六連問</h2><p>第1回提交後，新版會自動進入20題逐題訂正；顯示原選、正解和解析，需逐題確認並可登記仍不懂。訂正紀錄可匯出給家長；完成後同一瀏覽器會自動帶入第一回結果。首批已備妥5類弱點的六連問；其他錯題列待辦，不假裝全部有題庫。</p><a class="btn secondary" id="sixGateEntry" href="./six-gate-v1-2/">進入六連問（完成20題訂正後開放）→</a><div class="small">六連問完成 ≠ 關帳，仍需隔日或數日後做不同情境的無提示回測。</div></section>
-<section class="card"><span class="badge">STEP 3 · 等實際結果</span><h2 style="margin-top:9px">下一批20題｜動態出題</h2><p>請於第1回完成後，按「<b>手機分享完整結果（LINE）</b>」，由家長把 JSON 提供到 ChatGPT。才會按失分、低覆蓋與六連問結果設計第2回，而不是直接重刷固定題。</p><p class="small">目前尚未自動把結果傳到家長 LINE 或 ChatGPT；GitHub Pages 為靜態網頁，分享步驟需手動完成。未取得新成績前，不預先假設弱點已改善。</p></section>
+</style></head><body><main><header><div class="tag">EN-XIANG · PYTHON ITS</div><h1>老師重點講義｜V4 同頁測驗</h1><p class="sub">全新20題 → 自動逐題訂正 → 同一頁六連問。<br>不跳回舊20題，也不需要下載 HTML 才能開始。</p></header>
+<section class="card"><span class="badge">STEP 1 · V4 新版</span><h2 style="margin-top:9px">新一回：20題首次測驗</h2><p>題目選自老師60題母版內<b>前一回尚未作答的20題</b>。與10/16舊5/20分開紀錄，可檢查真實新題覆蓋及新版操作是否順暢。</p><div class="notice" id="status">正在檢查本機作答進度…</div><a class="btn" href="./integrated-v4/">點這裡進入 V4｜20題＋訂正＋六連問 →</a><div class="small">本機瀏覽器自動保存；交卷後直接自動訂正，完成後在同一頁開始六連問。</div></section>
+<section class="card"><span class="badge">STEP 2 · 不離開 V4 頁面</span><h2 style="margin-top:9px">逐題核對 → 同頁六連問</h2><p>V4交卷後直接進訂正，逐題確認原選、正解和解析，保留首次錯題。訂正20/20後，使用同一頁的按鈕進六連問；中途中斷可回到進度。不懂的概念留待補教，不用假裝已掌握。</p><p class="notice"><b>六連問入口已整合進 V4。</b>這裡不提供會突然導向20題舊頁面的第二個按鈕；只要從上方 V4 按鈕進入即可。</p><div class="small">六連問完成 ≠ 關帳，仍需隔日或數日後做不同情境的無提示回測。</div></section>
+<section class="card"><span class="badge">STEP 3 · 等實際結果</span><h2 style="margin-top:9px">下一批20題｜動態出題</h2><p>請在V4完成後，下載「初測＋訂正＋六連問」完整 JSON，由家長提供給 ChatGPT。才會按失分、低覆蓋與六連問結果設計第2回，而不是直接重刷固定題。</p><p class="small">目前不會自動將結果傳到家長LINE或GitHub；仍需從V4下載JSON並手動交給家長。未取得新成績前，不預先假設弱點已改善。</p></section>
 <section class="card"><h2>這一輪怎麼算完成？</h2><div class="step"><span class="num">1</span><div><b>初測 20 題</b><div class="small">保存第一次答案、時間、翻譯輔助、猜測與不懂。</div></div></div><div class="step"><span class="num">2</span><div><b>依概念補教</b><div class="small">每次挑1～3個高優先弱點，六連問對準第一個錯誤節點。</div></div></div><div class="step"><span class="num">3</span><div><b>延遲無提示驗證</b><div class="small">有獨立變式證據，才逐漸從紅／黃調整狀態，不因當下訂正直接變綠。</div></div></div></section><p class="foot">首次發佈：2026-10-16｜以老師《ITS Python 重點講義》為題源，原60題及舊V2考卷保留未改。</p></main>
-<script>try{let s=JSON.parse(localStorage.getItem('enxiang_its_python_lecture_first20_web_v2')||'null');let d=s?Object.values(s.responses||{}).filter(x=>x.done).length:0;let review=JSON.parse(localStorage.getItem('enxiang_its_python_round1_read_review_v3')||'null');
-let reviewed=!!(s?.roundSubmitted?.includes(0)&&review?.assessmentKey?.startsWith('v2-round1|'+s.started+'|')&&
-Object.values(review.items||{}).filter(x=>x.confirmedAt).length===20);
-document.getElementById('status').textContent=s?.roundSubmitted?.includes(0)?
- (reviewed?'✔ 第1回已完成20題訂正紀錄，可進入六連問。':'✔ 第1回已交卷；請先從上方按鈕逐題核對20題正解和解析。'):
- ('本機已完成 '+d+' / 20 題｜尚未提交');
-if(!reviewed){
-  // Prior UI unexpectedly redirected '六連問' click to 20題訂正.
-  // Present a clearly disabled state; never navigate without an explicit labeled action.
-  let gate=document.getElementById('sixGateEntry');
-  let count=Object.values(review?.items||{}).filter(x=>x.confirmedAt).length;
-  gate.textContent='六連問暫未開放｜請先完成逐題訂正（'+count+'/20）';
-  gate.removeAttribute('href');
-  gate.setAttribute('aria-disabled','true');
-  gate.style.background='#e1e7ef';gate.style.color='#43536c';gate.style.cursor='not-allowed';
-  gate.onclick=e=>{e.preventDefault();alert('這是六連問補強入口，現在還沒完成20題訂正（'+count+'/20）。請點上方「開始／繼續20題；已交卷者進入訂正」，訂正完成再回來。此處不會自動跳頁。')};
-}
-}catch(e){document.getElementById('status').textContent='尚未取得本機進度；可直接開始20題。'}</script></body></html>
+<script>
+(function(){
+ try{
+ const v=JSON.parse(localStorage.getItem('enxiang_its_python_v4_new20')||'null');
+ const n=Object.values(v?.responses||{}).filter(x=>x.done).length;
+ document.getElementById('status').textContent=v?.roundSubmitted?.includes(0)
+  ? 'V4新20題已提交；點上方V4按鈕接續逐題訂正或六連問。'
+  : '本機V4新20題已作答 '+n+' /20。上回V2/V3紀錄保留不變。';
+ }catch(e){document.getElementById('status').textContent='點上方按鈕開始V4新20題。'}
+})();
+</script></body></html>
