@@ -6,12 +6,25 @@ const escapeHTML=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;"
 const initial=()=>({version:VERSION,createdAt:iso(),lessonSeenAt:null,stage:"lesson",answers:{},submittedAt:null,review:{},work:{},activeBank:null,updatedAt:iso()});
 let S;try{S=JSON.parse(localStorage.getItem(STORE)||"null")}catch(e){S=null}
 if(!S||S.version!==VERSION||!S.answers||!S.review||!S.work)S=initial();
-let activeQ=null,tick=null;
+let activeQ=null,tick=null,gateTick=null;
 function save(){S.updatedAt=iso();localStorage.setItem(STORE,JSON.stringify(S))}
 function show(id){for(const k of ["lesson","quiz","review","topics","gate","summary"])$(k).classList.toggle("hide",k!==id);S.stage=id;save()}
 function sumTime(){if(tick!==null&&activeQ){const r=S.answers[activeQ];if(r&&!r.submittedAt)r.seconds=Math.round((r.seconds+(Date.now()-tick)/1000)*1000)/1000;tick=null;save()}}
-document.addEventListener("visibilitychange",()=>{if(document.hidden)sumTime();else if(S.stage==="quiz"&&activeQ&&tick===null)tick=Date.now()});
-window.addEventListener("pagehide",sumTime);
+function gateSpend(){
+ if(gateTick!==null&&S.stage==="gate"&&S.activeBank){
+  const w=S.work[S.activeBank],r=w?.responses[gatePosition(w)];
+  if(r&&!r.submittedAt){r.seconds=Math.round(((r.seconds||0)+(Date.now()-gateTick)/1000)*1000)/1000;}
+  gateTick=null;save();
+ }
+}
+document.addEventListener("visibilitychange",()=>{
+ if(document.hidden){sumTime();gateSpend();}
+ else{
+  if(S.stage==="quiz"&&activeQ&&tick===null)tick=Date.now();
+  if(S.stage==="gate"&&S.activeBank&&gateTick===null){const w=S.work[S.activeBank],r=w?.responses[gatePosition(w)];if(r&&!r.submittedAt)gateTick=Date.now();}
+ }
+});
+window.addEventListener("pagehide",()=>{sumTime();gateSpend()});
 function createAnswer(q){return S.answers[q.id]||(S.answers[q.id]={choice:null,marks:{},unknown:null,seconds:0,submittedAt:null})}
 function isCorrect(q,r){if(!r||r.unknown||!r.submittedAt)return false;if(q.kind==="multi")return [0,1,2,3].every(i=>r.marks?.[i]===q.answer.includes(i));return r.choice===q.answer[0]}
 function answerLabel(q,r){if(r?.unknown)return ({english:"題意英文看不懂",concept:"不知道指令或觀念",trace:"知道指令但不會追結果"})[r.unknown];if(q.kind==="multi")return [0,1,2,3].filter(i=>r.marks[i]===true).map(i=>abc[i]).join("+")||"未選";return Number.isInteger(r?.choice)?abc[r.choice]:"未選"}
@@ -95,7 +108,7 @@ function renderGate(){
  const key=S.activeBank;if(!key||!BANKS[key]){renderTopics();return}
  const w=createWork(key);if(w.finishedAt){renderSummary();return}
  const i=gatePosition(w),q=BANKS[key].items[i],r=w.responses[i]||(w.responses[i]={choice:null,unknown:null,reason:"",micro:"",submittedAt:null,correct:false,ackAt:null,advancedAt:null});
- show("gate");$("gStep").textContent=BANKS[key].name+"｜第 "+(i+1)+" / 6 關";
+ gateSpend();show("gate");gateTick=r.submittedAt?null:Date.now();$("gStep").textContent=BANKS[key].name+"｜第 "+(i+1)+" / 6 關";
  $("gZh").textContent=["① 名詞本義","② 操作對象與狀態","③ 直接應用","④ 條件改變","⑤ 跨概念連結","⑥ 陷阱與理由"][i]+"： "+q.zh;
  $("gCode").textContent=q.code||"";$("gCode").classList.toggle("hide",!q.code);
  $("gChoices").innerHTML=q.options.map((o,j)=>'<label class="choice"><input type="radio" name="gChoice" value="'+j+'" '+(r.choice===j?"checked":"")+(r.submittedAt?" disabled":"")+'> <b>'+abc[j]+'</b><span>'+escapeHTML(o)+'</span></label>').join("");
@@ -114,7 +127,7 @@ function submitGate(unknown=false){
  const key=S.activeBank;if(!key)return;const w=createWork(key),i=gatePosition(w),q=BANKS[key].items[i],r=w.responses[i];if(!r||r.submittedAt)return;
  if(!unknown&&!Number.isInteger(r.choice)){alert("先選答案，或標記這關不懂。");return}
  if(!unknown&&i===5&&r.reason.trim().length<5){alert("第6關請先寫至少5字判斷理由。");return}
- r.unknown=unknown?"concept":null;r.submittedAt=iso();r.correct=!unknown&&r.choice===q.answer[0];save();renderGate();
+ gateSpend();r.unknown=unknown?"concept":null;r.submittedAt=iso();r.correct=!unknown&&r.choice===q.answer[0];save();renderGate();
 }
 function nextGate(){
  if(!gateReady())return;const key=S.activeBank,w=S.work[key],i=gatePosition(w);
@@ -143,7 +156,7 @@ $("rNote").oninput=checkReview;$("rRead").onchange=checkReview;
 document.querySelectorAll('input[name="rStatus"]').forEach(i=>i.onchange=checkReview);
 $("rSubmit").onclick=commitReview;$("gSubmit").onclick=()=>submitGate(false);
 $("gUnknown").onclick=()=>submitGate(true);$("gNext").onclick=nextGate;
-$("gHome").onclick=renderTopics;$("showSummary").onclick=renderSummary;
+$("gHome").onclick=()=>{gateSpend();renderTopics()};$("showSummary").onclick=renderSummary;
 $("backTopics").onclick=renderTopics;$("export1").onclick=exportJSON;$("export2").onclick=exportJSON;
 if(!S.lessonSeenAt)show("lesson");
 else if(!S.submittedAt)renderQuiz();
