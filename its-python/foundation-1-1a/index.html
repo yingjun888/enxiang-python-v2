@@ -1,0 +1,29 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>恩翔 Python 基礎重建 1-1A｜手機學習</title><link rel="stylesheet" href="./style.css"><script src="./data.js" defer></script><script src="./app.js" defer></script></head><body><main>
+<header><div class="light">恩翔 · ITS Python · 老師講義 1-1A</div><h1>基礎指令重新開始</h1><p>變數、int、float、str、bool、type()、print()</p><p class="light">先看懂指令 → 12題初測 → 必經逐題訂正 → 依錯因六連問</p></header>
+<section class="card hide" id="lesson"><h2>① 先學會指令的作用</h2><p class="notice">以老師《ITS Python重點講義》PDF第3～4頁、1-1節為主。這是基礎教學，不是一次考20題的綜合測驗。</p>
+<div class="lesson"><h3>變數與指派</h3><pre>x = 10</pre><p><code>=</code> 是「指派」：把右邊的值交給左邊名稱 x。後面若寫 <code>x = "Hi"</code>，x 的值與型別就改變了。</p></div>
+<div class="lesson"><h3>先掌握四種基本型別</h3><pre>a = 10       # int 整數
+b = 10.0     # float 浮點數
+c = "10"     # str 字串
+d = True     # bool 布林值</pre><p>先看<b>有沒有引號</b>、<b>有沒有小數點</b>。<code>10</code>、<code>10.0</code>、<code>"10"</code>的型別不同。</p></div>
+<div class="lesson"><h3>type() vs print()</h3><pre>x = 7
+print(x)        # 7
+print(type(x))  # &lt;class 'int'&gt;</pre><p><b>type()</b> 取得型別；<b>print()</b> 顯示結果。英文 <b>value</b> 是值，<b>output</b> 是輸出。</p></div>
+<div class="lesson"><h3>每讀一行問三件事</h3><p>這行指令<b>做什麼</b>？變數現在<b>指向什麼值</b>？值的<b>型別是什麼</b>？</p><p class="small">這次先學1-1A；list、tuple、dict、set、NoneType與/、//留在1-1B，不超前到型別轉換。</p></div>
+<div class="actions"><button class="primary" id="begin">已讀完教學｜開始12題</button></div></section>
+<section class="card hide" id="quiz"><div class="counter" id="qStep"></div><p class="small">題目由易到難，不懂可明確標記。首次答案提交後不得更改。</p><h2 id="qZh"></h2><p class="small" id="qEn"></p><pre id="qCode" class="hide"></pre><div id="qChoices"></div>
+<p class="small">不會答不用猜，可以選擇原因：</p><div class="actions"><button id="qUenglish">英文題意看不懂</button><button id="qUconcept">指令／觀念不知道</button><button id="qUtrace">知道指令但不會推算</button></div><div class="actions"><button class="primary" id="qSubmit">鎖定首次答案｜下一題</button></div></section>
+<section class="card hide" id="review"><div class="counter" id="rStep"></div><p class="notice">逐題訂正：先錯題再對題。12題皆確認後才開啟六連問，這不是重新考試。</p><h2 id="rZh"></h2><pre id="rCode" class="hide"></pre><div id="rAnswer" class="review"></div><p><b>你現在對這題的理解：</b></p>
+<label class="choice"><input type="radio" name="rStatus" value="understand"><span>可以自己說明原因</span></label>
+<label class="choice"><input type="radio" name="rStatus" value="unclear"><span>仍然不懂，需要再教一次</span></label>
+<textarea id="rNote" placeholder="如果原本錯了、現在說理解，請用至少5個字寫出判斷規則。"></textarea>
+<label class="tick"><input id="rRead" type="checkbox"><span>我已讀過自己原選、正確答案及解析。</span></label>
+<div class="actions"><button class="primary" id="rSubmit" disabled>確認訂正｜下一題</button></div></section>
+<section class="card hide" id="topics"><h2>③ 針對首次錯因補強</h2><p class="notice">已做完12題與逐題核對。每個概念有六關；每次可先練一組，不需同時做完所有組。</p><div id="tStat"></div><div id="tList"></div><div class="actions"><button id="showSummary">查看學習摘要</button><button class="primary" id="export1">下載完整學習 JSON</button></div></section>
+<section class="card hide" id="gate"><div class="counter" id="gStep"></div><p class="notice">六連問在本頁完成；首次12題的答案不會被改寫。答錯會先保留錯誤證據再顯示微教學。</p><h2 id="gZh"></h2><pre id="gCode" class="hide"></pre><div id="gChoices"></div>
+<div id="gReasonWrap" class="hide"><p><b>第6關：請至少寫5字說明你為何如此判斷。</b></p><textarea id="gReason" placeholder="請用自己的話寫出理由"></textarea></div>
+<div id="gFeedback" class="review hide"></div><div id="gReteach" class="hide"><p><b>確認理解後才能前進；第1、2關答錯時請先寫一句你的理解。</b></p><textarea id="gMicro" placeholder="補教後請寫你學到的規則"></textarea><label class="tick"><input id="gAck" type="checkbox"><span>我已閱讀解析，知道自己錯在哪裡。</span></label></div>
+<div class="actions"><button id="gUnknown">這關我不知道</button><button class="primary" id="gSubmit">提交本關首次作答</button><button class="primary hide" id="gNext" disabled>下一關</button><button id="gHome">保存進度｜回六連問清單</button></div></section>
+<section class="card hide" id="summary"><h2>④ 學習摘要</h2><div id="sumStats"></div><div id="sumBody"></div><p class="notice">六關完成不等於已掌握。1～3天後仍需不同情境的無提示回測。</p><div class="actions"><button class="primary" id="export2">下載完整學習 JSON</button><button id="backTopics">回六連問清單</button></div></section>
+<footer>本機自動保存｜同裝置同瀏覽器可接續｜不同裝置不會同步｜交給家長的JSON須手動匯出；不會自動發 LINE 或提交私人 Git</footer>
+</main></body></html>
