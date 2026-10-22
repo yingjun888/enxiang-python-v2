@@ -143,9 +143,86 @@ function snapshot(){
  const misses=missedTopics();
  return {schema:"enxiang.python.lecture.1-1a.foundations.v1",version:VERSION,source:"ITS_Python重點講義 §1-1（PDF第3–4頁）",createdAt:S.createdAt,lessonSeenAt:S.lessonSeenAt,firstSubmittedAt:S.submittedAt,exportedAt:iso(),answers:QUESTIONS.map(q=>({id:q.id,concept:q.topic,kind:q.kind||"single",standardAnswer:q.answer,initialResponse:S.answers[q.id]||null,initialCorrect:isCorrect(q,S.answers[q.id]),review:S.review[q.id]||null})),sixGates:Object.fromEntries(Object.entries(BANKS).map(([k,b])=>[k,{concept:b.name,sourceMisses:misses[k],work:S.work[k]||null}])),metrics:{answered:QUESTIONS.filter(q=>!!S.answers[q.id]?.submittedAt).length,correct:QUESTIONS.filter(q=>isCorrect(q,S.answers[q.id])).length,reviewed:QUESTIONS.filter(q=>!!S.review[q.id]?.confirmedAt).length},mastery:"DELAYED_PENDING_NO_AUTOCLOSURE"};
 }
-function exportJSON(){
- const text=JSON.stringify(snapshot(),null,2),blob=new Blob([text],{type:"application/json;charset=utf-8"}),url=URL.createObjectURL(blob);
- const a=document.createElement("a");a.href=url;a.download="enxiang_python_1-1A_"+iso().slice(0,10)+".json";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);
+/* iOS / in-app browsers may ignore a programmatically clicked Blob URL.
+   Keep an on-page fallback visible and do not mutate any first answers. */
+const exportFilename=()=>"enxiang_python_1-1A_"+iso().slice(0,10)+".json";
+function exportPayload(){return JSON.stringify(snapshot(),null,2);}
+function exportedCounts(){
+ const p=snapshot(),work=Object.values(p.sixGates||{});
+ return "首次作答 "+p.metrics.answered+"/12；逐題訂正 "+p.metrics.reviewed+"/12；六連問已完成 "+work.reduce((n,w)=>n+Object.values(w.work?.responses||{}).filter(r=>!!r.submittedAt).length,0)+" 關（可以先匯出）。";
+}
+function exportStatus(message){$("exportStatus").textContent=message;}
+function openExportPanel(){
+ $("exportPanel").classList.remove("hide");
+ $("exportStats").textContent=exportedCounts();
+ $("exportRaw").value=exportPayload();
+ const can=canShareJSON();
+ $("exportShare").disabled=!can;
+ if(!can)exportStatus("此瀏覽器未提供可用的檔案分享功能。請按「複製完整 JSON」或「顯示 JSON 原文」，也可以試一般瀏覽器下載。");
+ else exportStatus("iPhone 可透過系統分享選單選擇「儲存到檔案」。若未跳出分享面板，可按下方的其他匯出方式。");
+ $("exportPanel").scrollIntoView?.({behavior:"auto",block:"start"});
+}
+function buildShareFile(){
+ if(typeof File!=="function")return null;
+ return new File([exportPayload()],exportFilename(),{type:"application/json"});
+}
+function canShareJSON(){
+ if(typeof navigator==="undefined"||typeof navigator.share!=="function"||typeof navigator.canShare!=="function")return false;
+ try{const file=buildShareFile();return !!file&&navigator.canShare({files:[file]});}catch(e){return false;}
+}
+function shareJSON(){
+ // navigator.share() must be invoked in the synchronous user gesture.
+ openExportPanel();
+ if(!canShareJSON())return;
+ try{
+  const file=buildShareFile();
+  exportStatus("正在開啟 iPhone 分享選單…選「儲存到檔案」後再確認檔案位置。");
+  Promise.resolve(navigator.share({files:[file],title:"恩翔 Python 1-1A 學習紀錄"}))
+   .then(()=>exportStatus("系統分享程序已返回；請到「檔案」App 確認 JSON 是否儲存成功。"))
+   .catch(err=>exportStatus(err?.name==="AbortError"?"已取消分享。紀錄仍在網頁中，可再次分享或改用複製。":"系統分享沒有完成："+String(err?.message||err)+"。請使用複製 JSON 或一般下載。"));
+ }catch(err){exportStatus("分享功能無法啟動："+String(err?.message||err)+"。可使用複製或一般下載。");}
+}
+function browserDownloadJSON(){
+ openExportPanel();
+ let url=null;
+ try{
+  const content=exportPayload();
+  const blob=new Blob([content],{type:"application/json;charset=utf-8"});
+  url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;a.download=exportFilename();
+  document.body.appendChild(a);a.click();a.remove();
+  // iOS may begin handling the Blob only after the click callback returns.
+  setTimeout(()=>URL.revokeObjectURL(url),120000);
+  exportStatus("已向瀏覽器提出下載要求，但無法從網頁確認是否已儲存。若沒有看到檔案，請改用「分享」或「複製完整 JSON」。");
+ }catch(err){
+  if(url)URL.revokeObjectURL(url);
+  exportStatus("下載方式無法使用："+String(err?.message||err)+"。請改用「分享」或「複製完整 JSON」。");
+ }
+}
+function showRawExport(){
+ openExportPanel();
+ $("exportRaw").classList.remove("hide");
+ exportStatus("已顯示全部 JSON 原文。若複製鈕失敗，請在文字框內長按、全選、複製，再貼到訊息或備忘錄傳給家長。");
+}
+function clipboardFallback(){
+ $("exportRaw").classList.remove("hide");
+ const ta=$("exportRaw");ta.focus();ta.select();
+ if(typeof document.execCommand==="function"){
+  try{if(document.execCommand("copy")){exportStatus("JSON 文字已複製。請貼入訊息或備忘錄再傳給家長。");return;}}catch(e){}
+ }
+ exportStatus("目前瀏覽器禁止自動複製。已顯示原文，請長按文字框手動全選、複製。");
+}
+function copyExportJSON(){
+ openExportPanel();
+ const text=exportPayload();
+ if(typeof navigator!=="undefined"&&navigator.clipboard&&typeof navigator.clipboard.writeText==="function"){
+  // Call writeText from the user's actual button tap, not a timeout.
+  try{Promise.resolve(navigator.clipboard.writeText(text))
+   .then(()=>exportStatus("已複製完整 JSON。請貼到訊息或備忘錄傳給家長。"))
+   .catch(()=>clipboardFallback());return;}catch(e){}
+ }
+ clipboardFallback();
 }
 $("begin").onclick=begin;
 $("qSubmit").onclick=()=>commitQuestion();
@@ -157,7 +234,11 @@ document.querySelectorAll('input[name="rStatus"]').forEach(i=>i.onchange=checkRe
 $("rSubmit").onclick=commitReview;$("gSubmit").onclick=()=>submitGate(false);
 $("gUnknown").onclick=()=>submitGate(true);$("gNext").onclick=nextGate;
 $("gHome").onclick=()=>{gateSpend();renderTopics()};$("showSummary").onclick=renderSummary;
-$("backTopics").onclick=renderTopics;$("export1").onclick=exportJSON;$("export2").onclick=exportJSON;
+$("backTopics").onclick=renderTopics;
+$("export1").onclick=shareJSON;$("export2").onclick=shareJSON;
+$("exportShare").onclick=shareJSON;$("exportDownload").onclick=browserDownloadJSON;
+$("exportCopy").onclick=copyExportJSON;$("exportShow").onclick=showRawExport;
+$("exportClose").onclick=()=>{$("exportPanel").classList.add("hide")};
 if(!S.lessonSeenAt)show("lesson");
 else if(!S.submittedAt)renderQuiz();
 else if(!isReviewDone())renderReview();
