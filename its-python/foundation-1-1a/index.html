@@ -25,5 +25,19 @@ print(type(x))  # &lt;class 'int'&gt;</pre><p><b>type()</b> 取得型別；<b>pr
 <div id="gFeedback" class="review hide"></div><div id="gReteach" class="hide"><p><b>確認理解後才能前進；第1、2關答錯時請先寫一句你的理解。</b></p><textarea id="gMicro" placeholder="補教後請寫你學到的規則"></textarea><label class="tick"><input id="gAck" type="checkbox"><span>我已閱讀解析，知道自己錯在哪裡。</span></label></div>
 <div class="actions"><button id="gUnknown">這關我不知道</button><button class="primary" id="gSubmit">提交本關首次作答</button><button class="primary hide" id="gNext" disabled>下一關</button><button id="gHome">保存進度｜回六連問清單</button></div></section>
 <section class="card hide" id="summary"><h2>④ 學習摘要</h2><div id="sumStats"></div><div id="sumBody"></div><p class="notice">六關完成不等於已掌握。1～3天後仍需不同情境的無提示回測。</p><div class="actions"><button class="primary" id="export2">下載完整學習 JSON</button><button id="backTopics">回六連問清單</button></div></section>
+<section class="card hide" id="exportPanel" aria-label="學習紀錄匯出">
+<h2>儲存恩翔目前的學習紀錄</h2>
+<p class="notice">這份 JSON 包含已完成的12題、逐題訂正，以及目前做過的六連問。<b>六連問不必全部完成，也可以先保存現有紀錄。</b></p>
+<p id="exportStats"></p><p class="small" id="exportStatus" role="status" aria-live="polite">請選擇下方的匯出方式。</p>
+<div class="actions">
+<button type="button" class="primary" id="exportShare">iPhone 分享／儲存到「檔案」</button>
+<button type="button" id="exportDownload">一般瀏覽器下載 .json</button>
+<button type="button" id="exportCopy">複製完整 JSON 文字</button>
+<button type="button" id="exportShow">顯示 JSON 原文（可手動複製）</button>
+</div>
+<textarea id="exportRaw" class="hide" readonly rows="8" spellcheck="false" aria-label="JSON學習資料原文"></textarea>
+<p class="small">iPhone 建議使用上方「分享」，再選「儲存到檔案」；若在 App 內建瀏覽器看不到分享功能，可選複製文字，或用 Safari 開啟相同網址。<b>切勿清除本網站瀏覽資料。</b></p>
+<div class="actions"><button type="button" id="exportClose">返回學習畫面（資料已保留）</button></div>
+</section>
 <footer>本機自動保存｜同裝置同瀏覽器可接續｜不同裝置不會同步｜交給家長的JSON須手動匯出；不會自動發 LINE 或提交私人 Git</footer>
 </main></body></html>
