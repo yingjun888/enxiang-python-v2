@@ -34,20 +34,20 @@ why:'float("12.4") 先得到 12.4，int(12.4) 再朝 0 截斷成整數 12。',
 retry:{kind:'text',p:'不同數值，請寫出輸出。',code:'print(int(float("9.9")))',key:'9'}},
 {gate:4,stage:'條件改變',kind:'single',p:'若去掉 float() 中間步驟，程式會發生什麼事？',code:'print(int("12.4"))',o:['12','12.4','ValueError','13'],key:2,
 why:'字串 "12.4" 不是合法的整數字串，int() 直接處理它會出現 ValueError。',
-retry:{kind:'single',p:'條件改為以下字串時，結果如何？',code:'s = "6.2"\nprint(int(s))',o:['6','ValueError','6.2','7'],key:1}},
-{gate:5,stage:'跨概念連結',kind:'single',p:'先辨別字串，再辨別整數，這行輸出什麼？',code:'s = "0"\nn = int(s)\nprint(bool(s), bool(n))',o:['True False','False False','True True','False True'],key:0,
+retry:{kind:'single',p:'條件改為以下字串時，結果如何？',code:'s = "6.2"\nprint(int(s))',o:['ValueError','6','6.2','7'],key:0}},
+{gate:5,stage:'跨概念連結',kind:'single',p:'先辨別字串，再辨別整數，這行輸出什麼？',code:'s = "0"\nn = int(s)\nprint(bool(s), bool(n))',o:['False False','True False','True True','False True'],key:1,
 why:'字串 "0" 不是空字串，所以 bool(s) 是 True；整數 n=0，所以 bool(n) 是 False。',
-retry:{kind:'single',p:'這兩個變數的型別依序是什麼？',code:'s = "0"\nn = int(s)\nprint(type(s).__name__, type(n).__name__)',o:['int int','str int','str str','int str'],key:1}},
-{gate:6,stage:'陷阱辨識／說明理由',kind:'single',p:'有人認為：經過 int(float(a))，原本 a 也會變成整數。請判斷輸出，並寫理由。',code:'a = "7.8"\nb = int(float(a))\nprint(a, b)',o:['7.8 7','7 7','7.8 8','ValueError'],key:0,reason:true,
+retry:{kind:'single',p:'這兩個變數的型別依序是什麼？',code:'s = "0"\nn = int(s)\nprint(type(s).__name__, type(n).__name__)',o:['int int','str str','str int','int str'],key:2}},
+{gate:6,stage:'陷阱辨識／說明理由',kind:'single',p:'有人認為：經過 int(float(a))，原本 a 也會變成整數。請判斷輸出，並寫理由。',code:'a = "7.8"\nb = int(float(a))\nprint(a, b)',o:['7 7','7.8 8','ValueError','7.8 7'],key:3,reason:true,
 why:'右側運算只把新整數交給 b；原本 a 沒有重新指派，仍保留字串 "7.8"。請用自己的話說明。',
-retry:{kind:'single',p:'換成沒有接住回傳值的寫法，印出什麼？請寫理由。',code:'a = "3.9"\nint(float(a))\nprint(a)',o:['3','3.9','ValueError','4'],key:1,reason:true}}
+retry:{kind:'single',p:'換成沒有接住回傳值的寫法，印出什麼？請寫理由。',code:'a = "3.9"\nint(float(a))\nprint(a)',o:['3','4','ValueError','3.9'],key:3,reason:true}}
 ];
 const $=id=>document.getElementById(id),iso=()=>new Date().toISOString();
 const escapeHTML=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fresh=()=>({schema:SCHEMA,version:VERSION,source:{originalFoundation:'ITS_1_2A_FOUNDATION_V1',originalGateVersion:'ITS_1_2A_SIX_GATE_V1',originId:'A207',originalGate1:'INDEPENDENT_PASS_FROM_PARENT_EXPORT',originalGate2:'NEEDS_RETEACHING_FROM_PARENT_EXPORT',preserveOriginal:true},createdAt:iso(),startedAt:null,completedAt:null,index:0,phase:'lesson',results:[],history:[]});
 let S;try{S=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){}
 if(!S||S.version!==VERSION||!Array.isArray(S.results))S=fresh();
-const status=()=>S.phase==='done'?(S.results.some(x=>x.status==='NEEDS_RETEACHING')?'OPEN_NEEDS_RETEACHING':'REMEDIATED_DELAYED_PENDING'):'IN_PROGRESS';
+const status=()=>S.phase==='done'?(S.results.some(x=>x.status==='NEEDS_RETEACHING')?'OPEN_NEEDS_RETEACHING':S.results.some(x=>x.status==='REASON_REVIEW_REQUIRED')?'REMEDIATED_REASON_REVIEW_AND_DELAYED_PENDING':'REMEDIATED_DELAYED_PENDING'):'IN_PROGRESS';
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){$('exportStatus').textContent='目前無法本機存檔，請立即匯出 JSON。'}}
 function result(q){let r=S.results.find(x=>x.gate===q.gate);if(!r){r={gate:q.gate,stage:q.stage,first:null,retry:null,status:'IN_PROGRESS'};S.results.push(r)}return r}
 function blockLater(){for(let i=S.index+1;i<Q.length;i++){let q=Q[i];S.results.push({gate:q.gate,stage:q.stage,first:null,retry:null,status:'BLOCKED_BY_PREREQUISITE'})}}
