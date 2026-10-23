@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#174a7e"><title>恩翔 ITS Python 1-3B｜字串運算與方法・新單元 V1</title>
+<style>
+:root{--bg:#f0f5fb;--paper:#fff;--ink:#18283d;--muted:#52647b;--line:#d8e2ef;--blue:#205ca9;--red:#aa3340;--green:#14704b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,BlinkMacSystemFont,"Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif}
+main{max-width:720px;margin:auto;padding:16px 14px 55px}
+h1{font-size:27px;line-height:1.28;margin:8px 0}h2{font-size:21px;margin:0 0 12px}p{margin:9px 0}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:17px;padding:20px;margin:14px 0;box-shadow:0 2px 10px #2055850a}
+.hidden{display:none!important}.muted{color:var(--muted)}.small{font-size:14px;color:var(--muted)}
+.tag{display:inline-block;background:#e4efff;color:#154c90;border-radius:25px;padding:4px 12px;font-size:13px;font-weight:750}
+.meter{height:9px;background:#dee7f1;border-radius:12px;overflow:hidden}.meter div{width:0;height:100%;background:#347dbd;transition:width .2s}
+.notice{border-left:4px solid #3078bf;border-radius:9px;background:#edf4ff;padding:11px 14px;margin:12px 0}
+.warning{border-left-color:#b78131;background:#fff6e9}.actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(195px,1fr));gap:11px;margin:16px 0 6px}
+button{font:inherit;font-weight:700;cursor:pointer;border:1px solid #b2c9df;border-radius:11px;background:#f5faff;color:#184a89;min-height:52px;padding:11px 15px}
+button.primary{color:#fff;background:var(--blue);border-color:var(--blue)}
+button:disabled{opacity:.45;cursor:not-allowed}button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #e8a43b;outline-offset:2px}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;border-radius:12px;background:#182b46;color:#f6f9fe;padding:17px 14px;font:15px/1.7 ui-monospace,SFMono-Regular,Consolas,monospace}
+.choice{display:flex;align-items:flex-start;gap:12px;border:2px solid #dde6f0;border-radius:12px;min-height:57px;padding:12px 11px;margin:9px 0;cursor:pointer}
+.choice:has(input:checked){border-color:var(--blue);background:#edf4ff}
+.choice input{width:22px;height:22px;flex-shrink:0;margin:2px 0;accent-color:var(--blue)}
+.option-letter{min-width:25px;font-weight:800}.option-text{white-space:pre-wrap;overflow-wrap:anywhere;font:15px/1.6 ui-monospace,SFMono-Regular,"Microsoft JhengHei",monospace}
+.box{border:1px solid var(--line);border-left:5px solid var(--green);border-radius:10px;padding:13px;margin:14px 0}
+.box.wrong{border-left-color:var(--red)}.check{display:flex;gap:10px;align-items:flex-start;margin:10px 0}
+.check input{width:21px;height:21px;flex-shrink:0}textarea{width:100%;min-height:85px;resize:vertical;border:2px solid var(--line);border-radius:10px;padding:12px;font:inherit}
+#raw{height:260px;font:12px/1.5 ui-monospace,Consolas,monospace}
+.resultRows>div{padding:9px 0;border-bottom:1px solid #e8eef4}
+footer{font-size:13px;color:var(--muted);margin:25px 5px}
+@media(max-width:430px){.card{padding:16px}h1{font-size:24px}.actions{grid-template-columns:1fr}}
+</style></head><body><main>
+<header><span class="tag">ITS Python｜§1-3B 新知初測</span><h1>Python 1-3B｜字串運算與常用方法</h1>
+<p class="small">老師《ITS Python 重點講義》§1-3 後半段，印刷第6–7頁｜新編14題，不重複1-3A</p>
+<div class="meter"><div id="bar"></div></div><p id="status" class="small" aria-live="polite"></p></header>
+<section id="intro" class="card">
+<h2>① 新單元首次診斷</h2>
+<p>本卷範圍：字串串接與重複、成員檢查、大小寫與空白處理、拆分及接合、尋找與替換、字串不可變性、字串比較。</p>
+<div class="notice">若還沒學過這一節，先閱讀老師講義，再開始測驗。作答時不查答案、不執行程式；請自己推算。</div>
+<div class="notice warning">首次答案逐題鎖定；全14題交完，才看得見答案及逐題訂正。不會請按「我不會／不確定」，不要亂猜。複選題要勾選所有正確項。</div>
+<p class="small">紀錄與1-3A及所有舊測驗隔離；不會清除或覆蓋既有分數。本卷為新知初測，不是1-3A的延遲回測。</p>
+<div class="actions"><button class="primary" id="start">開始 1-3B 新題｜14 題</button><button id="exportIntro">匯出已有紀錄</button></div>
+</section>
+<section id="quiz" class="card hidden"><span class="tag" id="progress"></span><h2 id="question"></h2>
+<p id="concept" class="small"></p><pre id="code"></pre><div id="options"></div>
+<div id="typeHint" class="notice warning">首次作答後不能更改；所有題目首次完成後才進入訂正。</div>
+<div class="actions"><button id="unknown">我不會／不確定</button><button class="primary" id="submit">鎖定本題答案 →</button></div>
+<button id="exportQuiz">匯出目前紀錄</button>
+</section>
+<section id="review" class="card hidden"><span class="tag" id="reviewProgress"></span><h2 id="reviewQuestion"></h2><pre id="reviewCode"></pre>
+<div id="feedback" class="box"></div>
+<div class="notice"><strong>訂正後理解狀態</strong><div class="check"><label><input type="radio" name="understanding" value="understand">我已理解原因</label></div>
+<div class="check"><label><input type="radio" name="understanding" value="unclear">仍不理解，留待補教</label></div>
+<label for="note" class="small">首次答錯／不會時，請用自己的話寫出判斷依據（至少5字）：</label><textarea id="note" placeholder="用自己的話說明程式為何如此執行；不要只抄正確選項"></textarea>
+<div class="check"><input type="checkbox" id="confirmed"><label for="confirmed">我已核對首次答案、標準答案與解析</label></div></div>
+<div class="actions"><button class="primary" id="confirmReview">確認理解狀態，下一題 →</button><button id="exportReview">匯出 JSON</button></div>
+</section>
+<section id="summary" class="card hidden"><h2>③ 首次測驗與訂正結果</h2><div id="summaryText" class="resultRows"></div>
+<div class="notice warning">本卷訂正完成不代表此概念已跨日精熟。家長依首次錯題及理解備註安排後續補教與延遲回測。</div>
+<div class="actions"><button class="primary" id="exportSummary">匯出給家長｜JSON</button></div>
+</section>
+<section id="export" class="card hidden"><h2>匯出學習紀錄</h2>
+<p>在 iPhone 可先用「系統分享」儲存 JSON 到「檔案」，再透過 LINE 傳給家長；若分享不支援，改用下載或複製 JSON。</p>
+<div class="actions"><button class="primary" id="share">系統分享 JSON</button><button id="download">下載 JSON</button><button id="copy">複製 JSON 全文</button><button id="showRaw">顯示 JSON 原文</button></div>
+<p id="exportMsg" class="small" role="status"></p><textarea id="raw" class="hidden" readonly></textarea><div class="actions"><button id="closeExport">返回測驗／訂正</button></div>
+</section>
+<footer>版本 ITS_1_3B_NEW_V1｜本機儲存；不會自動寄送LINE或寫入Git。匯出後請家長回傳JSON供錯題追蹤。</footer>
+</main>
+<script>
+(function(){
+"use strict";
+const QUESTIONS = [{"id":"B301","concept":"concat_repeat","type":"single","question":"這段 Python 程式會輸出什麼？","code":"x = \"ab\"\ny = \"c\"\nprint(x * 2 + y)","options":["aabbc","ababc","abcabc","abab"],"correct":"B","why":"\"ab\" * 2 先得到 \"abab\"，再接上 \"c\"，結果為 ababc。","optionWhy":["aabbc 把重複誤解成各字元分別重複。","ababc 是重複整段 ab 兩次後接 c。","abcabc 相當於把 ab+c 整段重複兩次。","abab 少了最後串接的 c。"]},{"id":"B302","concept":"membership_len","type":"single","question":"執行後，print 會顯示哪一組結果？","code":"print(\"Py\" in \"Python\", len(\"Py\" + \"thon\"))","options":["True 5","False 6","False 5","True 6"],"correct":"D","why":"\"Py\" 是 \"Python\" 的子字串，判斷為 True；\"Py\"+\"thon\" 長度為 6，print 以空格分開兩個值。","optionWhy":["子字串判斷正確，但合併後長度為 6 而非 5。","長度為 6，但 Python 包含連續的 Py，故應為 True。","Py 有出現在 Python 中，而且字串總長不是 5。","成員檢查為 True，字串總長 6，兩者皆正確。"]},{"id":"B303","concept":"strip_lower","type":"single","question":"下列程式輸出哪個字串？（選項中的空格也算輸出內容）","code":"s = \"  Hello  \"\nprint(s.strip().lower())","options":["hello","hello  ","  hello","HELLO"],"correct":"A","why":"strip() 移除左右兩側空白，再以 lower() 將字母轉成小寫，輸出 hello。","optionWhy":["左右空白被 strip 移除，Hello 又轉成 hello。","結尾兩個空白已被 strip() 移除，不會保留。","開頭兩個空白已被 strip() 移除，不會保留。","lower() 會轉成小寫，不是大寫。"]},{"id":"B304","concept":"capitalize_title","type":"single","question":"執行程式後會得到哪個字串？","code":"t = \"hELLO wORLD\"\nprint(t.capitalize())","options":["Hello World","hello world","Hello world","HELLO WORLD"],"correct":"C","why":"capitalize() 將整個字串第一個字元轉大寫，其餘字母轉小寫，得到 Hello world；每個單字首字大寫才是 title()。","optionWhy":["Hello World 是每個單字首字母大寫的 title() 行為。","整個字串第一個字元會變成大寫 H。","capitalize() 只保留整段開頭的大寫 H，其餘小寫。","其餘字母不會維持大寫，會被轉成小寫。"]},{"id":"B305","concept":"split_explicit_separator","type":"single","question":"執行後會印出哪個串列？","code":"print(\"red,,blue\".split(\",\"))","options":["['red', 'blue']","['red', '', 'blue']","['red,', 'blue']","['red,,blue']"],"correct":"B","why":"split(\",\") 以每個逗號為分隔符號；連續兩個逗號之間有一個空字串，因此回傳三個元素。","optionWhy":["連續兩個分隔符號之間會產生空字串，不能略掉。","由兩個逗號切出 red、空字串、blue 三段。","逗號是分隔符號，不會留在 red 的元素中。","給定的逗號存在且是分隔符號，不會維持整串單一元素。"]},{"id":"B306","concept":"split_join_chain","type":"single","question":"下面程式最後印出什麼？","code":"s = \"red-blue-green\"\nprint(\"/\".join(s.split(\"-\")))","options":["red/blue/green","red-blue-green","redbluegreen","/red/blue/green/"],"correct":"A","why":"先依 \"-\" 將字串拆成 red、blue、green 三段，再以 \"/\" 把三段接起來，分隔符號只出現在元素之間。","optionWhy":["拆分後用斜線作為中間的連接符，結果為 red/blue/green。","中間的連接符已改成斜線，不保留連字號。","join 指定斜線作分隔符，不會直接緊貼合併。","join 不會在第一個元素前或最後一個元素後額外加入斜線。"]},{"id":"B307","concept":"replace_limit","type":"single","question":"這段程式的輸出為何？","code":"print(\"papaya\".replace(\"a\", \"o\", 2))","options":["papoyo","popoyo","papaya","popoya"],"correct":"D","why":"replace(\"a\",\"o\",2) 只替換從左往右遇到的前兩個 a：papaya → popoya；最後一個 a 保留。","optionWhy":["這個結果只替換後兩個 a，並非由左至右前兩個。","popoyo 是三個 a 都被替換，超過指定的 2 次。","replace 已指定替換兩個 a，不會完全不變。","只有前兩個 a 換成 o，最後一個 a 保留。"]},{"id":"B308","concept":"find_index_count","type":"multi","question":"依照下列字串，哪些敘述正確？（請勾選所有正確選項）","code":"s = \"coconut\"","options":["s.find(\"x\") == -1","s.index(\"o\") == 1","s.count(\"o\") == 3","s.index(\"x\") == -1"],"correct":["A","B"],"why":"找不到 x 時 find() 回傳 -1，但 index() 會拋出 ValueError；第一個 o 的索引是 1，o 總共出現 2 次。","optionWhy":["找不到 x 時，find() 的回傳值確實為 -1。","第一個 o 出現在從 0 起算的索引 1。","coconut 中 o 只出現 2 次，而不是 3 次。","index() 找不到 x 時會拋出 ValueError，不會回傳 -1。"]},{"id":"B309","concept":"index_count","type":"single","question":"程式會印出哪兩個數字？","code":"s = \"marmalade\"\nprint(s.index(\"a\"), s.count(\"a\"))","options":["0 3","1 2","1 3","4 3"],"correct":"C","why":"marmalade 第一個 a 出現在索引 1，且共有三個 a，因此 print 顯示 1 3。","optionWhy":["索引 0 是 m，第一個 a 在索引 1。","第一個 a 的位置正確，但 a 共出現 3 次。","index 取第一次出現位置 1，count 計算總次數 3。","索引 4 是第二個 a，並非首次出現位置。"]},{"id":"B310","concept":"string_immutability","type":"single","question":"以下程式最後會輸出什麼？","code":"s = \"cloud\"\ns.replace(\"c\", \"C\")\nprint(s)","options":["Cloud","cloud","CLOUD","loud"],"correct":"B","why":"字串不可直接修改；replace() 產生新字串，但程式沒有把結果指定回 s，因此原本 s 仍是 cloud。","optionWhy":["replace() 的結果未被指定回 s，因此沒有變成 Cloud。","未重新指定時 s 保持原本的 cloud。","replace 只指定將 c 換成 C，也不會把其他字母大寫。","replace() 並不是刪除 c，且原字串沒有改變。"]},{"id":"B311","concept":"split_default_whitespace","type":"bool","question":"判斷下列敘述是否正確：此程式最後會印出串列 ['a', 'b']。","code":"s = \" a b \"\nprint(s.split())","options":["正確","錯誤"],"correct":"true","why":"split() 不帶參數時依任意空白分割，忽略前後連續空白，得到 ['a', 'b']。","optionWhy":["原句成立，因為不帶參數的 split() 會依空白分割為兩項。","這裡不是指定固定字元的 split(' ')，所以不會保留前後空白造成的空項。"]},{"id":"B312","concept":"unicode_lexicographic","type":"single","question":"執行後 print 會顯示哪兩個布林值？","code":"print(\"B\" \u003c \"a\", \"21\" \u003c \"3\")","options":["True True","True False","False True","False False"],"correct":"A","why":"字串逐字比較 Unicode 字元值：大寫 B 的碼位小於小寫 a；比較 \"21\" 和 \"3\" 時先看首字元 \"2\" \u003c \"3\"，因此兩者都是 True。","optionWhy":["B 的字元碼位小於 a，而且 '2' 小於 '3'，兩個比較均為 True。","第二組是字串比較，首字元 2 小於 3，故也是 True。","大寫 B 的碼位小於小寫 a，因此第一組不是 False。","兩組都能在首字元確認前者較小，均非 False。"]},{"id":"B313","concept":"isdigit_isalpha","type":"multi","question":"依照下列程式設定，哪些敘述的運算結果為 True？（請勾選所有正確選項）","code":"s = \"a12\"","options":["s.isdigit() == False","s.isalpha() == True","\"abc\".isalpha() == True","\"12 \".isdigit() == True"],"correct":["A","C"],"why":"a12 包含字母與數字，所以 isdigit()、isalpha() 都是 False；abc 全是字母，isalpha() 為 True；\"12 \" 含空白，isdigit() 是 False。","optionWhy":["s 含 a 字母，不全是數字，因此 isdigit() 是 False，等式成立。","s 也含有 1、2 數字，不全是字母，所以 isalpha() 並非 True。","abc 全由字母組成，isalpha() 是 True，等式成立。","字串包含空白，不能視為全部數字，isdigit() 是 False。"]},{"id":"B314","concept":"endswith_case","type":"bool","question":"判斷下列敘述是否正確：這段程式會印出 True。","code":"print(\"Report.csv\".endswith(\".CSV\"))","options":["正確","錯誤"],"correct":"false","why":"endswith() 區分大小寫；實際副檔名是小寫 .csv，而比較的 .CSV 是大寫，因此印出 False。","optionWhy":["大寫 .CSV 與小寫 .csv 不同，endswith() 不會自動忽略大小寫。","判斷為錯誤才符合程式結果：實際輸出為 False。"]}];
+const ABC = ["A","B","C","D"];
+const STORE = "enxiang_its_python_1_3b_new_v1";
+const SCHEMA = "enxiang.python.lecture.1-3b.new-unit.v1";
+const VERSION = "ITS_1_3B_NEW_V1";
+const $ = id => document.getElementById(id);
+const iso = () => new Date().toISOString();
+const initial = () => ({schema:SCHEMA,version:VERSION,createdAt:iso(),firstStartedAt:null,answers:{},reviews:{},finishedAt:null});
+let S;
+try { const previous = JSON.parse(localStorage.getItem(STORE)||"null");S=previous && previous.schema===SCHEMA ? previous : initial(); }
+catch(e) { S=initial(); }
+let origin="intro", questionStarted=Date.now();
+function persist(){ try { localStorage.setItem(STORE,JSON.stringify(S)); } catch(e){ $("status").textContent="此瀏覽器無法保存作答，請即時匯出JSON。"; } }
+function safe(s){return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function shown(id){for(const x of ["intro","quiz","review","summary","export"])$(x).classList.toggle("hidden",x!==id);origin=id;window.scrollTo(0,0);}
+const finishedInitial=()=>QUESTIONS.every(q=>Boolean(S.answers[q.id]?.submittedAt));
+const countAnswered=()=>QUESTIONS.filter(q=>Boolean(S.answers[q.id]?.submittedAt)).length;
+const nextQuiz=()=>QUESTIONS.find(q=>!S.answers[q.id]?.submittedAt);
+const nextReview=()=>QUESTIONS.find(q=>!S.reviews[q.id]?.confirmedAt);
+function keySet(q){return q.type==="multi"?q.correct:(q.type==="bool"?[q.correct==="true"?"true":"false"]:[q.correct]);}
+function equality(q,a) {
+ if(a.unknown)return false;
+ if(q.type==="multi"){const picked=Array.isArray(a.selected)?a.selected:[];return picked.length===q.correct.length&&picked.every(x=>q.correct.includes(x));}
+ return a.choice===q.correct;
+}
+function answerDisplay(q,a){
+ if(a.unknown)return "不會／不確定";
+ if(q.type==="multi")return a.selected?.length?a.selected.join("、"):"未選";
+ if(q.type==="bool")return a.choice==="true"?"正確":"錯誤";
+ return a.choice||"未選";
+}
+function keyDisplay(q){return q.type==="multi"?q.correct.join("、"):(q.type==="bool"?(q.correct==="true"?"正確":"錯誤"):q.correct);}
+function diagnosis(q,a){
+ if(a.unknown)return "首次標記為不會／不確定，尚需重建本題概念。";
+ if(q.type==="multi"){let lines=[];q.options.forEach((o,i)=>{let code=ABC[i],picked=(a.selected||[]).includes(code),should=q.correct.includes(code);if(picked!==should)lines.push(code+"："+q.optionWhy[i]);});return lines.join("\n")||q.why;}
+ if(q.type==="bool")return q.optionWhy[a.choice==="true"?0:1]||q.why;
+ return q.optionWhy[ABC.indexOf(a.choice)]||q.why;
+}
+function updateStatus(){
+ const n=countAnswered(),reviewed=QUESTIONS.filter(q=>S.reviews[q.id]?.confirmedAt).length;
+ $("bar").style.width=((n/QUESTIONS.length)*100)+"%";
+ $("status").textContent="首次作答："+n+"/14　｜　訂正："+reviewed+"/14　｜　資料僅保存在本機";
+}
+function render(){
+ updateStatus();
+ if(!S.firstStartedAt){shown("intro");return;}
+ const q=nextQuiz();if(q){shown("quiz");renderQuiz(q);return;}
+ const r=nextReview();if(r){shown("review");renderReview(r);return;}
+ shown("summary");renderSummary();
+}
+function renderQuiz(q){
+ let i=QUESTIONS.indexOf(q);$("progress").textContent="新題初測｜第 "+(i+1)+"/14 題";
+ $("question").textContent=q.question;
+ $("concept").textContent=q.type==="multi"?"複選：請勾選所有正確敘述":q.type==="bool"?"是非判斷：請選正確／錯誤":"單選：請選一個完整正確答案";
+ $("code").textContent=q.code;
+ const div=$("options");div.replaceChildren();
+ const opts=q.type==="bool"?["true","false"]:ABC;
+ q.options.forEach((o,j)=>{
+   const label=document.createElement("label");label.className="choice";
+   const input=document.createElement("input");input.type=q.type==="multi"?"checkbox":"radio";input.name="answer";input.value=opts[j];
+   const marker=document.createElement("span");marker.className="option-letter";marker.textContent=q.type==="bool"?"":ABC[j]+".";
+   const txt=document.createElement("span");txt.className="option-text";txt.textContent=o;
+   label.append(input,marker,txt);div.appendChild(label);
+ });
+ questionStarted=Date.now();
+}
+function saveAnswer(unknown){
+ const q=nextQuiz();if(!q)return;
+ let selected=[...document.querySelectorAll('input[name="answer"]:checked')].map(x=>x.value);
+ if(!unknown&&!selected.length){alert("請選答案，或按「我不會／不確定」。");return;}
+ const a={unknown:unknown?"uncertain":null,choice:null,selected:[],seconds:Math.max(0,(Date.now()-questionStarted)/1000),submittedAt:iso()};
+ if(!unknown){if(q.type==="multi")a.selected=selected.sort();else a.choice=selected[0];}
+ a.correct=equality(q,a);S.answers[q.id]=a;persist();render();
+}
+function renderReview(q){
+ let i=QUESTIONS.indexOf(q),a=S.answers[q.id];
+ $("reviewProgress").textContent="逐題訂正｜第 "+(i+1)+"/14 題";
+ $("reviewQuestion").textContent=q.question;
+ $("reviewCode").textContent=q.code;
+ const f=$("feedback");f.className="box"+(a.correct?"":" wrong");
+ let s="<p><b>首次答案："+safe(answerDisplay(q,a))+"</b>｜"+(a.correct?"首次正確":"首次未通過")+"</p>";
+ s+="<p>標準答案：<b>"+safe(keyDisplay(q))+"</b></p>";
+ if(!a.correct)s+="<p>你需要修正的地方：</p><p style='white-space:pre-line'>"+safe(diagnosis(q,a))+"</p>";
+ s+="<p><b>完整解釋：</b>"+safe(q.why)+"</p>";
+ const details=q.options.map((o,j)=>{
+   let l=q.type==="bool"?(j===0?"正確":"錯誤"):ABC[j];
+   return "<div style='margin-top:7px'><b>"+safe(l)+"</b>　"+safe(o)+"<div class='small'>"+safe(q.optionWhy[j])+"</div></div>";
+ }).join("");
+ f.innerHTML=s+"<details><summary>展開各選項逐項解釋</summary>"+details+"</details>";
+ document.querySelectorAll('input[name="understanding"]').forEach(n=>n.checked=false);
+ $("note").value="";$("confirmed").checked=false;
+}
+function saveReview(){
+ const q=nextReview();if(!q)return;
+ const selected=document.querySelector('input[name="understanding"]:checked');
+ if(!selected||!$("confirmed").checked){alert("請選擇理解狀態，並勾選核對完成。");return;}
+ const note=$("note").value.trim();
+ if(!S.answers[q.id].correct && [...note.replace(/\s/g,"")].length<5){alert("首次未通過題請用自己的話寫至少5字的判斷依據。");return;}
+ S.reviews[q.id]={understanding:selected.value,note,confirmedAt:iso()};
+ if(QUESTIONS.every(v=>Boolean(S.reviews[v.id]?.confirmedAt)))S.finishedAt=iso();
+ persist();render();
+}
+function renderSummary(){
+ let total=QUESTIONS.filter(q=>S.answers[q.id]?.correct).length;
+ let wrong=QUESTIONS.filter(q=>!S.answers[q.id]?.correct).map(q=>q.id);
+ let unclear=QUESTIONS.filter(q=>S.reviews[q.id]?.understanding==="unclear").map(q=>q.id);
+ const stat=wrong.length||unclear.length?"NEW_UNIT_NEEDS_TARGETED_REVIEW":"NEW_UNIT_INITIAL_PASS_DELAYED_PENDING";
+ let html="<div><b>首次答對："+total+"/14（"+(100*total/14).toFixed(1)+"%）</b></div>";
+ html+="<div>首次未通過："+safe(wrong.join("、")||"無")+"</div>";
+ html+="<div>訂正後仍未理解："+safe(unclear.join("、")||"無")+"</div>";
+ html+="<div>狀態："+safe(stat)+"</div>";
+ $("summaryText").innerHTML=html;
+}
+function exportData(){
+ const complete=finishedInitial();let result=QUESTIONS.filter(q=>S.answers[q.id]).map(q=>{
+   const a=S.answers[q.id];return {
+    id:q.id,concept:q.concept,kind:q.type,question:q.question,code:q.code,options:q.options,
+    standardAnswer:complete?keyDisplay(q):null,correctExplanation:complete?q.why:null,
+    optionExplanations:complete?q.optionWhy:null,
+    wrongAnswerDiagnosis:complete&&!a.correct?diagnosis(q,a):null,
+    initialResponse:a,review:S.reviews[q.id]||null
+   };
+ });
+ const missed=QUESTIONS.filter(q=>S.answers[q.id]&&!S.answers[q.id].correct).map(q=>q.id);
+ const unclear=QUESTIONS.filter(q=>S.reviews[q.id]?.understanding==="unclear").map(q=>q.id);
+ const state=complete?(missed.length||unclear.length?"NEW_UNIT_NEEDS_TARGETED_REVIEW":"NEW_UNIT_INITIAL_PASS_DELAYED_PENDING"):"IN_PROGRESS";
+ return JSON.stringify({
+   schema:SCHEMA,version:VERSION,
+   source:{teacherLecture:"ITS Python 重點講義 §1-3",unit:"1-3B 字串運算、常用方法與字串比較",pages:"印刷6–7頁（PDF第7–8頁）",assessmentType:"NEW_UNIT_INITIAL_DIAGNOSTIC",previousMasterUnchanged:true},
+   createdAt:S.createdAt,firstStartedAt:S.firstStartedAt,exportedAt:iso(),finishedAt:S.finishedAt,
+   answers:result,
+   metrics:{answered:countAnswered(),initialCorrect:QUESTIONS.filter(q=>S.answers[q.id]?.correct).length,reviewed:QUESTIONS.filter(q=>S.reviews[q.id]?.confirmedAt).length,initialWrongIds:missed,unclearIds:unclear},
+   mastery:state,parentReviewPending:true,gitSync:"EXPORT_AND_PARENT_UPLOAD_REQUIRED",deviceQa:"NOT_VERIFIED_ON_IPHONE"
+ },null,2);
+}
+function filename(){
+ const now=new Date();const date=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Taipei",year:"numeric",month:"2-digit",day:"2-digit"}).format(now);
+ return "enxiang_python_1-3B_NEW_V1_"+date+".json";
+}
+function exportOpen(){["intro","quiz","review","summary"].forEach(id=>$(id).classList.add("hidden"));$("export").classList.remove("hidden");$("raw").classList.add("hidden");$("exportMsg").textContent="請確認分享或下載後的檔案確實存在。";origin="export";window.scrollTo(0,0);}
+async function shareJSON(){
+ const f=new File([exportData()],filename(),{type:"application/json"});
+ try{if(navigator.canShare?.({files:[f]})&&navigator.share){await navigator.share({files:[f],title:"恩翔 Python 1-3B 答題紀錄"});$("exportMsg").textContent="已叫出系統分享；請確認已實際傳送或儲存。";return;}}
+ catch(e){if(e.name==="AbortError")return;$("exportMsg").textContent="檔案分享未完成，請改用下載或複製。";return;}
+ $("exportMsg").textContent="此瀏覽器不支援分享檔案，請改用下載或複製。";
+}
+function downloadJSON(){
+ const u=URL.createObjectURL(new Blob([exportData()],{type:"application/json;charset=utf-8"}));
+ const a=document.createElement("a");a.href=u;a.download=filename();document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1500);
+ $("exportMsg").textContent="已觸發下載，請檢查裝置中的實際檔案。";
+}
+async function copyJSON(){
+ try{await navigator.clipboard.writeText(exportData());$("exportMsg").textContent="已複製完整 JSON，可貼到LINE傳給家長。";}
+ catch(e){$("raw").classList.remove("hidden");$("raw").value=exportData();$("raw").focus();$("raw").select();$("exportMsg").textContent="無法自動複製，請手動選取下方原文。";}
+}
+$("start").addEventListener("click",()=>{if(!S.firstStartedAt)S.firstStartedAt=iso();persist();render();});
+$("submit").addEventListener("click",()=>saveAnswer(false));
+$("unknown").addEventListener("click",()=>saveAnswer(true));
+$("confirmReview").addEventListener("click",saveReview);
+["exportIntro","exportQuiz","exportReview","exportSummary"].forEach(id=>$(id).addEventListener("click",exportOpen));
+$("share").addEventListener("click",shareJSON);
+$("download").addEventListener("click",downloadJSON);
+$("copy").addEventListener("click",copyJSON);
+$("showRaw").addEventListener("click",()=>{$("raw").classList.remove("hidden");$("raw").value=exportData();});
+$("closeExport").addEventListener("click",render);
+render();
+})();
+</script></body></html>
