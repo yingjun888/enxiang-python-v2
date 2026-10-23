@@ -105,7 +105,7 @@ function render(){
   const q=g.transfer[Math.min(w.transfers.length,g.transfer.length-1)];
   p.innerHTML='<span class="tag">第 '+g.gate+' 關｜不同情境回測 '+(w.transfers.length+1)+'</span>'+
   '<p class="small">這個回測已經有前面的講解，所以即使答對，也只能算補教後通過，不是無提示獨立測驗。</p>'+
-  (w.transfers.length>=2?'<p class="notice warn">兩題新的變式已使用完畢，接下來是<b>重複已看過的練習題</b>；即使答對也不當作新的Transfer驗證，需家長另給新題。</p>':'')+questionHTML(q);
+  (w.transfers.length>=g.transfer.length?'<p class="notice warn">所有新的變式已使用完畢，接下來是<b>重複已看過的練習題</b>；即使答對也不當作新的Transfer驗證，需家長另給新題。</p>':'')+questionHTML(q);
   if(g.gate===6)p.innerHTML+='<p><b>請用自己的話解釋（至少8字）</b></p><textarea id="reason" placeholder="誰被重新指派？"></textarea>';
   appendControls(p,[btn('transferSubmit','確定回測答案',()=>submitTransfer(false)),btn('transferUnknown','回測仍不知道',()=>submitTransfer(true),'')]);return
  }
@@ -144,7 +144,7 @@ function submitTransfer(unknown){
  const q=g.transfer[Math.min(w.transfers.length,g.transfer.length-1)];
  const v=unknown?-1:readChoice();if(v===null)return;
  const reason=unknown?'':g.gate===6?wantReason():'';if(reason===null)return;
- const r=makeRecord(q,v,unknown,reason);r.assessment=w.transfers.length>=2?'REPEATED_VISIBLE_ITEM_PRACTICE':'NEW_VARIANT_GUIDED_TRANSFER';w.transfers.push(r);w.status=r.correct?(r.assessment==='REPEATED_VISIBLE_ITEM_PRACTICE'?'PRACTICE_ONLY_PARENT_REVIEW_REQUIRED':'TRANSFER_GUIDED_PASS_NOT_MASTERED'):'OPEN_NEEDS_RETEACHING';w.phase='transferFeedback';
+ const r=makeRecord(q,v,unknown,reason);r.assessment=w.transfers.length>=g.transfer.length?'REPEATED_VISIBLE_ITEM_PRACTICE':'NEW_VARIANT_GUIDED_TRANSFER';w.transfers.push(r);w.status=r.correct?(r.assessment==='REPEATED_VISIBLE_ITEM_PRACTICE'?'PRACTICE_ONLY_PARENT_REVIEW_REQUIRED':'TRANSFER_GUIDED_PASS_NOT_MASTERED'):'OPEN_NEEDS_RETEACHING';w.phase='transferFeedback';
  log('transfer_attempt',{correct:r.correct,unknown,attempt:w.transfers.length});save();render();
 }
 function renderDone(){
