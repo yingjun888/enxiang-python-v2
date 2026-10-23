@@ -7,7 +7,7 @@ const $=id=>document.getElementById(id), iso=()=>new Date().toISOString(), A='AB
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const stored=(k)=>{try{return JSON.parse(localStorage.getItem(k)||'null')}catch(e){return null}};
 const oldV1AtOpen=stored(KEY_V1);
-function blankGate(g){return {gate:g.gate,status:'OPEN',phase:'lesson',first:null,micro:[[],[]],reflections:[],transfers:[],finishedAt:null,heldAt:null}}
+function blankGate(g){return {gate:g.gate,status:'OPEN',phase:'lesson',first:null,micro:[[],[]],microStart:[0,0],reflections:[],transfers:[],finishedAt:null,heldAt:null}}
 function fresh(){return {schema:SCHEMA,version:APP_VERSION,createdAt:iso(),gatePos:0,startedAt:null,completedAt:null,stage:'intro',gates:GATES.map(blankGate),history:[],v1ExistedOnOpen:!!oldV1AtOpen,lastSaved:null}}
 let S=stored(KEY_V2);
 if(!S||S.version!==APP_VERSION||!Array.isArray(S.gates)||S.gates.length!==5)S=fresh();
@@ -63,7 +63,7 @@ function render(){
  if(S.completedAt){renderDone();return}
  const g=item(),w=work(),p=$('panel');
  if(w.phase==='hold'){p.innerHTML='<h2>這一關尚未學會，已保留原始答案</h2><p class="notice warn">不會因為一直重考就宣稱已掌握。可以先找老師／家長一起看解析，或重新進行步驟補教。</p>';
- p.appendChild(btn('resumeReteach','從分步驟補教繼續',()=>{w.phase='micro';w.heldAt=null;log('resume_after_hold');save();render()}));return}
+ p.appendChild(btn('resumeReteach','從分步驟補教繼續',()=>{w.microStart=[w.micro[0].length,w.micro[1].length];w.phase='micro';w.heldAt=null;log('resume_after_hold');save();render()}));return}
  if(w.phase==='lesson'){
   p.innerHTML='<span class="tag">A207｜第 '+g.gate+'/6 關｜'+esc(g.stage)+'</span><h2>'+esc(g.concept)+'</h2><p class="notice">'+esc(g.lesson)+'</p><pre>'+esc(g.example)+'</pre><p class="small">先理解原理，下一題是此修正版的新題，和昨天的V1題目不同。教材基準：老師 ITS Python 講義 §1-2。</p>';
   p.appendChild(btn('startGate','理解後做一題新情境',()=>{w.phase='first';log('start_gate');save();render()}));return
@@ -81,8 +81,8 @@ function render(){
     w.phase=w.first.correct?'transfer':'micro';save();render()}));return
  }
  if(w.phase==='micro'){
-  const step=w.micro[0].some(x=>x.correct)?1:0;
-  if(step===1&&w.micro[1].some(x=>x.correct)){w.phase='reflect';save();render();return}
+  const step=w.micro[0].slice(w.microStart?.[0]||0).some(x=>x.correct)?1:0;
+  if(step===1&&w.micro[1].slice(w.microStart?.[1]||0).some(x=>x.correct)){w.phase='reflect';save();render();return}
   const q=step===0?g.step1:g.step2;
   p.innerHTML='<span class="tag">第 '+g.gate+' 關｜微觀念 '+(step+1)+'/2</span><p class="notice">這是補教中的小題，可以重試；即使答對也只屬於<b>提示後練習</b>。</p>'+questionHTML(q);
   let attempt=w.micro[step].at(-1);
@@ -109,7 +109,7 @@ function render(){
   (r.correct?'<p class="notice good">這是<b>補教後回測通過</b>。'+(g.gate===6?'最後一關理由另待家長人工確認。':'')+' 仍需跨日無提示新題驗證。</p>':
     '<p class="notice warn">這一題仍有概念缺口，<b>不會直接進下一關，也不會清除錯誤紀錄</b>。你可以繼續分步補教，或先暫停請大人協助。</p>');
   if(r.correct)p.appendChild(btn('advanceGate',g.gate===6?'查看本次補教摘要':'保留證據｜進下一關',()=>{w.finishedAt=iso();w.status=g.gate===6?'REASON_REVIEW_AND_DELAYED_PENDING':'GUIDED_PASS_DELAYED_PENDING';log('gate_finished',{status:w.status});S.gatePos++;if(S.gatePos===5)S.completedAt=iso();save();render()}));
-  else appendControls(p,[btn('retryMicro','繼續微教學（保留剛才錯誤）',()=>{w.phase='micro';log('repeat_micro');save();render()}),btn('holdGate','暫停本關，保留不懂',()=>{w.phase='hold';w.heldAt=iso();w.status='OPEN_NEEDS_RETEACHING';log('hold_open');save();render()},'')]);
+  else appendControls(p,[btn('retryMicro','繼續微教學（保留剛才錯誤）',()=>{w.microStart=[w.micro[0].length,w.micro[1].length];w.phase='micro';log('repeat_micro');save();render()}),btn('holdGate','暫停本關，保留不懂',()=>{w.phase='hold';w.heldAt=iso();w.status='OPEN_NEEDS_RETEACHING';log('hold_open');save();render()},'')]);
   return
  }
 }
@@ -121,10 +121,10 @@ function submitFirst(unknown){
 }
 function submitMicro(unknown){
  const w=work(),g=item();if(w.phase!=='micro')return;
- const step=w.micro[0].some(x=>x.correct)?1:0,q=step===0?g.step1:g.step2;
+ const step=w.micro[0].slice(w.microStart?.[0]||0).some(x=>x.correct)?1:0,q=step===0?g.step1:g.step2;
  const v=unknown?-1:readChoice();if(v===null)return;
  const r=makeRecord(q,v,unknown);w.micro[step].push(r);log('micro_attempt',{step,correct:r.correct,unknown});
- if(r.correct){w.phase=w.micro[1].some(x=>x.correct)?'reflect':'micro';}
+ if(r.correct){w.phase=w.micro[1].slice(w.microStart?.[1]||0).some(x=>x.correct)?'reflect':'micro';}
  // A wrong response remains visible as a teaching step, not an independent fail.
  save();render();
 }
