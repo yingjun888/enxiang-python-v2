@@ -92,7 +92,15 @@ function render(){
   p.innerHTML='<span class="tag">第 '+g.gate+' 關｜微觀念 '+(step+1)+'/2</span><p class="notice">這是補教中的小題，可以重試；即使答對也只屬於<b>提示後練習</b>。</p>'+questionHTML(q);
   let attempt=w.micro[step].at(-1);
   if(attempt&&!attempt.correct)p.innerHTML+='<div class="notice bad"><b>剛才還沒判對。</b> '+esc(q.why)+'<p>上次選 '+esc(attempt.optionLabel)+'，這是補教不是首次測驗。再試一次，或標記仍不懂。</p></div>';
-  appendControls(p,[btn('microSubmit','核對這一步',()=>submitMicro(false)),btn('microUnknown','這一步還是不懂',()=>submitMicro(true),'')]);return
+  appendControls(p,[btn('microSubmit','核對這一步',()=>submitMicro(false)),btn('microUnknown','這一步還是不懂',()=>submitMicro(true),'')]);
+  const wrongInThisRound=w.micro[step].slice(w.microStart?.[step]||0).filter(x=>!x.correct).length;
+  if(wrongInThisRound>=2){
+   p.innerHTML+='<p class="notice warn">這個微觀念已連續嘗試仍未通過。繼續選同一題可能只是在背選項，建議先交給家長或老師補教。</p>';
+   p.appendChild(btn('microHold','這一步仍不懂｜保留紀錄並請大人協助',()=>{
+     w.phase='hold';w.heldAt=iso();w.status='OPEN_NEEDS_RETEACHING';log('hold_after_repeated_micro_error',{step});save();render()
+   },''));
+  }
+  return
  }
  if(w.phase==='reflect'){
   p.innerHTML='<span class="tag">第 '+g.gate+' 關｜自己說明</span><h2>請把這兩個觀念連起來</h2><p class="notice">'+esc(g.concept)+'</p><p>用至少8個字說明剛才學到的規則。這段理由仍需家長或老師人工確認。</p><textarea id="reflection" placeholder="例如：轉換產生新值，若沒重新指派原變數，就不會變。"></textarea>';
