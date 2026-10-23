@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#215c9c">
+<title>恩翔 Python 1-2B｜型別轉換新題12題</title>
+<style>
+:root{--bg:#f0f4fa;--ink:#152b43;--muted:#52667f;--line:#cdd9e7;--blue:#215c9c;--good:#11744c;--bad:#a02e36}
+*{box-sizing:border-box}body{font-family:system-ui,-apple-system,"Noto Sans TC",sans-serif;margin:0;background:var(--bg);color:var(--ink);font-size:16px;line-height:1.6}main{max-width:730px;margin:auto;padding:16px 13px 65px}
+h1{font-size:26px;line-height:1.34;margin:10px 0}h2{font-size:21px;margin:0 0 13px}h3{font-size:17px;margin:14px 0 5px}p{margin:8px 0}.muted{color:var(--muted)}.small{font-size:13px;color:var(--muted)}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:19px;margin:13px 0;box-shadow:0 3px 14px #23497910}
+.chip{display:inline-block;background:#dceaff;border-radius:20px;color:#184c89;padding:4px 12px;font-size:13px;font-weight:750}
+.warning{background:#fff4e0;border-left:4px solid #b57b13;border-radius:8px;padding:11px;margin:14px 0}
+.note{background:#eaf4ff;border-left:4px solid var(--blue);padding:11px;border-radius:8px}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#15263e;color:#f7fafd;padding:14px;border-radius:12px;font:15px/1.6 ui-monospace,Menlo,Consolas,monospace}
+code{font-family:ui-monospace,Menlo,Consolas,monospace}
+button{cursor:pointer;font:inherit;font-weight:750;min-height:49px;padding:11px 13px;border:1px solid #b6cbe2;border-radius:10px;background:#f5f9fd;color:#1c4e85}
+button.primary{color:white;background:var(--blue);border-color:var(--blue)}
+button:focus-visible,textarea:focus-visible,input:focus-visible{outline:3px solid #f0b84d;outline-offset:2px}
+.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin:12px 0}
+.option{display:flex;gap:12px;align-items:center;padding:12px;border:2px solid #dbe3ee;border-radius:12px;margin:9px 0;min-height:55px;cursor:pointer;overflow-wrap:anywhere}
+.option:has(input:checked){border-color:#2865af;background:#edf5fe}
+.option input{width:22px;height:22px;flex:0 0 auto;accent-color:var(--blue)}
+.pair{border:1px solid var(--line);border-radius:10px;padding:11px;margin:10px 0}
+.pair .opts{display:flex;gap:25px;flex-wrap:wrap;margin:8px 0}
+.pair label{display:flex;gap:7px;align-items:center;min-height:42px}
+.pair input{width:22px;height:22px;accent-color:var(--blue)}
+textarea,input[type=text]{font:inherit;width:100%;padding:13px;border:2px solid var(--line);border-radius:11px;margin:10px 0;min-height:52px}
+textarea{min-height:90px;resize:vertical}
+.bar{background:#dce5f0;height:9px;overflow:hidden;border-radius:12px;margin:14px 0}.bar>div{height:100%;background:var(--blue);width:0}
+.hide{display:none!important}.feedback{border-left:4px solid var(--blue);background:#f3f7fc;border-radius:9px;padding:13px;margin:12px 0;overflow-wrap:anywhere}
+.feedback.good{border-left-color:var(--good)}.feedback.bad{border-left-color:var(--bad)}
+footer{margin:25px 0;color:var(--muted);font-size:13px}.row{display:flex;gap:10px;align-items:center;justify-content:space-between}.row button{font-size:13px}
+#raw{min-height:220px;font-size:12px}
+@media(max-width:470px){.card{padding:15px}h1{font-size:23px}.controls{grid-template-columns:1fr}}
+</style>
+</head><body><main>
+<header><span class="chip">ITS Python 老師講義 §1-2｜第二段・新覆蓋</span><h1>恩翔 Python 1-2B</h1><p class="muted">list()／tuple() 型別轉換｜12 題首次獨立初測</p><p class="small">版本 ITS_1_2B_FOUNDATION_V1｜與 1-2A A207 補教、1-1B-R1 回測分開記錄</p></header>
+<div class="row"><span id="saveStatus" class="small">讀取紀錄中…</span><button id="topExport" type="button">匯出 JSON</button></div>
+<div class="bar"><div id="bar"></div></div>
+<section id="intro" class="card">
+<h2>第一步｜先保護原來的延遲測驗</h2>
+<div class="warning"><strong>請先完成 2026/10/23 22:30 的 1-1B-R1 容器型別延遲回測，再開始本份 1-2B。</strong><p>因 1-2B 會練習 list/tuple，若提前做，可能影響 1-1B-R1 的獨立性。本頁不會改寫任何舊答卷。</p></div>
+<p>這份新題專門測老師講義 §1-2 尚未在 1-2A 覆蓋的 <code>list()</code>／<code>tuple()</code>。不是 A207 當下重考，也不是 1-3 字串操作。</p>
+<div class="note">檢查三件事：①轉換後是 list 還是 tuple；②元素原有型別會不會改變；③傳入不可迭代的整數會發生什麼。先獨立答 12 題，全部完成後才看解析。</div>
+<label class="option"><input id="r1Confirmed" type="checkbox">我確認已完成 1-1B-R1 的首次無提示回測</label>
+<p id="unlockNote" class="small"></p><div class="controls"><button id="begin" class="primary" type="button">開始 12 題新初測</button></div>
+</section>
+<section id="quiz" class="card hide">
+<div class="chip" id="qNumber"></div><h2 id="qPrompt"></h2><p id="qTopic" class="small"></p><pre id="qCode" class="hide"></pre>
+<div id="qOptions"></div><div id="qText" class="hide"><label for="textAnswer">請輸入完整 Python 輸出</label><input type="text" id="textAnswer" autocapitalize="off" autocomplete="off" spellcheck="false" placeholder="依程式實際輸入"></div>
+<div class="warning">首次作答不能修改；全部 12 題交完前不公布正解。不知道可直接標記原因，不必亂猜。</div>
+<div class="controls"><button type="button" class="unknown" data-reason="reading">題意看不懂</button><button type="button" class="unknown" data-reason="concept">指令概念不懂</button><button type="button" class="unknown" data-reason="trace">推不出執行結果</button></div>
+<div class="controls"><button id="submit" class="primary" type="button">確定送出這題首次答案</button></div>
+</section>
+<section id="review" class="card hide">
+<div class="chip" id="rNumber"></div><h2 id="rPrompt"></h2><pre id="rCode" class="hide"></pre><div id="rFeedback" class="feedback"></div>
+<p>訂正後你目前的理解程度：</p>
+<label class="option"><input type="radio" name="understanding" value="understand">我覺得能解釋原因（仍需後續驗證）</label>
+<label class="option"><input type="radio" name="understanding" value="unclear">仍然不懂，保留為弱點</label>
+<textarea id="rReason" placeholder="請寫下你的判斷原因；家長會核對語意（不能只輸入無意義文字）。"></textarea>
+<label class="option"><input type="checkbox" id="rConfirm">已核對原答、正解與解析（不代表精熟）</label>
+<div class="controls"><button id="reviewNext" class="primary" type="button">保留訂正｜下一題</button></div>
+</section>
+<section id="finish" class="card hide"><h2>1-2B 新題已完成</h2><div id="report"></div>
+<p class="warning">這是首次新單元取樣，<strong>不會自動標記 MASTERED</strong>。若有錯誤，要另開對應的六連問；A207 Gate4/Gate6 仍保持原來的不穩定追蹤。</p>
+<div class="controls"><button id="finishExport" class="primary">將結果 JSON 交給家長</button></div>
+</section>
+<section id="export" class="card hide"><h2>交付本次學習證據</h2>
+<p class="muted">資料僅儲存在這台瀏覽器，不會自動傳到 GitHub。請匯出後交給家長，才能納入追蹤。</p><p id="exportStatus" role="status"></p>
+<div class="controls"><button id="share" class="primary">iPhone 分享／儲存到檔案</button><button id="download">下載 JSON</button><button id="copy">複製 JSON 全文</button><button id="show">顯示完整 JSON</button></div>
+<textarea id="raw" class="hide" readonly></textarea><div class="controls"><button id="back">返回測驗畫面</button></div>
+</section>
+<footer>原生瀏覽器單機儲存；首次答題、訂正與匯出紀錄分開保存。請勿清除網站資料。</footer>
+</main>
+<script>
+"use strict";
+const QUESTIONS=[{"id":"B201","gate":"基本轉換","kind":"single","prompt":"這段程式的結果是什麼？","code":"list(\"map\")","opts":["[\"map\"]","[\"m\", \"a\", \"p\"]","(\"m\", \"a\", \"p\")","ValueError"],"key":1,"why":"list() 會依序取得字串中的每個字元，建立串列；不會把整個字串當成唯一一個元素。"},{"id":"B202","gate":"基本轉換","kind":"single","prompt":"這段程式的結果是什麼？","code":"tuple([6, 9])","opts":["[6, 9]","([6, 9],)","('6', '9')","(6, 9)"],"key":3,"why":"tuple() 從串列建立元組，保留兩個整數元素，沒有自動轉成字串。"},{"id":"B203","gate":"型別與元素","kind":"single","prompt":"這段程式的結果是什麼？","code":"list((4, 7))","opts":["[4, 7]","(4, 7)","['4', '7']","TypeError"],"key":0,"why":"從元組轉換為串列後使用中括號，但元素依然是整數。"},{"id":"B204","gate":"字串轉元組","kind":"single","prompt":"這段程式的結果是什麼？","code":"tuple(\"up\")","opts":["('up',)","['u', 'p']","('u', 'p')","'up'"],"key":2,"why":"字串有兩個字元，tuple() 產生兩個字串元素的元組。"},{"id":"B205","gate":"錯誤辨識","kind":"single","prompt":"這個運算會得到什麼？","code":"list(9)","opts":["[9]","['9']","[]","TypeError"],"key":3,"why":"整數 9 不可迭代，所以 list(9) 會拋出 TypeError；要做單元素串列可寫 [9]。"},{"id":"B206","gate":"單元素元組","kind":"single","prompt":"這段程式的結果是什麼？","code":"tuple([3])","opts":["(3,)","(3)","[3]","((3,),)"],"key":0,"why":"只有一個元素的元組表示時需要逗號，輸出為 (3,)。"},{"id":"B207","gate":"元素型別不變","kind":"single","prompt":"這段程式會得到什麼？","code":"list([\"8\", 2])","opts":["[8, 2]","('8', 2)","['8', 2]","TypeError"],"key":2,"why":"list() 不會把元素 '8' 自動轉為整數；str '8' 與 int 2 仍各自保有型別。"},{"id":"B208","gate":"空容器轉換","kind":"single","prompt":"這段程式的結果是什麼？","code":"list(())","opts":["[()]","[]","()","TypeError"],"key":1,"why":"空元組是可迭代但沒有元素的容器，轉成串列後是空串列 []。"},{"id":"B209","gate":"敘述真偽","kind":"multi","prompt":"逐項判斷下列敘述是否正確（可以有多個正確）。","code":"","opts":["list(\"xy\") 的結果是 [\"x\", \"y\"]","tuple(2) 的結果是 (2,)","tuple([3, 4]) 的結果是 [3, 4]","list(()) 的結果是 []"],"key":[true,false,false,true],"why":"A、D 正確。整數 2 不可迭代，tuple(2) 是 TypeError；tuple([3,4]) 會產生元組 (3,4)，不是串列。"},{"id":"B210","gate":"追蹤輸出","kind":"text","prompt":"請輸入 print() 真正印出的文字。","code":"print(type(tuple([7, 1])).__name__)","key":"tuple","why":"tuple([7,1]) 建立元組；type(...).__name__ 取得型別名稱 tuple。"},{"id":"B211","gate":"追蹤輸出","kind":"text","prompt":"請依 Python 顯示格式，輸入整行輸出（包含逗號與括號）。","code":"print(tuple(\"q\"))","key":"('q',)","why":"單一字元字串轉換為單元素元組，Python 印出 ('q',)，逗號不能漏。"},{"id":"B212","gate":"混合元素","kind":"text","prompt":"請輸入 print() 真正印出的完整結果。","code":"print(list((True, \"0\", 5)))","key":"[True, '0', 5]","why":"list() 保留 bool、str、int 三種既有元素型別；字串 '0' 不會被轉成數字 0。"}];
+const VERSION="ITS_1_2B_FOUNDATION_V1", SCHEMA="enxiang.python.lecture.1-2b.initial.v1";
+const STORE="enxiang_its_python_teacher_1_2b_v1";
+const CAN_START_AFTER=Date.parse("2026-10-23T22:31:00+08:00");
+function $(id){return document.getElementById(id);}
+function newState(){return {schema:SCHEMA,version:VERSION,source:"ITS Python teacher lecture 1-2 type conversion second part",stage:"intro",startedAt:null,completedAt:null,qPos:0,rPos:0,first:[],reviews:[],history:[],parentReviewPending:true,mastery:"NOT_MASTERED_INITIAL_AND_DELAYED_PENDING"};}
+let state;try{state=JSON.parse(localStorage.getItem(STORE)||"null");if(!state||state.version!==VERSION||!Array.isArray(state.first))state=newState();}catch(e){state=newState();}
+function persist(){try{localStorage.setItem(STORE,JSON.stringify(state));$("saveStatus").textContent="本機已儲存 "+new Date().toLocaleTimeString("zh-TW");}catch(e){$("saveStatus").textContent="儲存失敗；請立即匯出 JSON";}}
+function showStage(stage){["intro","quiz","review","finish","export"].forEach(s=>$(s).classList.toggle("hide",s!==stage));$("bar").style.width=(state.stage==="intro"?0:state.stage==="quiz"?state.first.length/24*100:state.stage==="review"?(12+state.reviews.length)/24*100:100)+"%";window.scrollTo(0,0);}
+function escap(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function formatAnswer(q,a){if(!a||a.unknown)return a&&a.unknown?"標記不懂："+a.unknown:"未作答";if(q.kind==="single")return "選項 "+String.fromCharCode(65+a.value)+"："+q.opts[a.value];if(q.kind==="multi")return a.value.map((v,i)=>String.fromCharCode(65+i)+(v?" 正確":" 錯誤")).join("、");return a.value;}
+function expected(q){if(q.kind==="single")return "選項 "+String.fromCharCode(65+q.key)+"："+q.opts[q.key];if(q.kind==="multi")return q.key.map((v,i)=>String.fromCharCode(65+i)+(v?" 正確":" 錯誤")).join("、");return q.key;}
+function normalize(s){return String(s).trim().replace(/\s+/g,"").replace(/[“”]/g,'"').replace(/[‘’]/g,"'").replace(/"/g,"'");}
+function correct(q,a){if(a.unknown)return false;if(q.kind==="single")return a.value===q.key;if(q.kind==="multi")return Array.isArray(a.value)&&a.value.length===4&&a.value.every((v,i)=>v===q.key[i]);return normalize(a.value)===normalize(q.key);}
+function render(){showStage(state.stage);if(state.stage==="quiz"){const q=QUESTIONS[state.qPos];if(!q){state.stage="review";persist();return render();}$("qNumber").textContent="首次新題 "+(state.qPos+1)+"／12";$("qPrompt").textContent=q.prompt;$("qTopic").textContent=q.id+"｜"+q.gate;$("qCode").textContent=q.code;$("qCode").classList.toggle("hide",!q.code);$("qOptions").innerHTML="";$("qText").classList.toggle("hide",q.kind!=="text");$("textAnswer").value="";if(q.kind==="single"){q.opts.forEach((s,i)=>{const label=document.createElement("label");label.className="option";label.innerHTML='<input type="radio" name="answer" value="'+i+'"><strong>'+String.fromCharCode(65+i)+'.</strong> <span>'+escap(s)+'</span>';$("qOptions").appendChild(label);});}
+if(q.kind==="multi"){q.opts.forEach((s,i)=>{let el=document.createElement("div");el.className="pair";el.innerHTML="<strong>"+String.fromCharCode(65+i)+". "+escap(s)+"</strong>"+'<div class="opts"><label><input type="radio" name="pair'+i+'" value="true">正確</label><label><input type="radio" name="pair'+i+'" value="false">錯誤</label></div>';$("qOptions").appendChild(el);});}} 
+if(state.stage==="review"){const q=QUESTIONS[state.rPos];if(!q){state.stage="finish";persist();return render();}const a=state.first[state.rPos];$("rNumber").textContent="逐題訂正 "+(state.rPos+1)+"／12";$("rPrompt").textContent=q.id+"｜"+q.prompt;$("rCode").textContent=q.code;$("rCode").classList.toggle("hide",!q.code);$("rFeedback").className="feedback "+(a.correct?"good":"bad");$("rFeedback").innerHTML="<b>首次作答："+escap(formatAnswer(q,a))+"</b><p>正解："+escap(expected(q))+"</p><p>解析："+escap(q.why)+"</p>";document.querySelectorAll('input[name="understanding"]').forEach(x=>x.checked=false);$("rReason").value="";$("rConfirm").checked=false;}
+if(state.stage==="finish"){let right=state.first.filter(x=>x.correct).length;let wrong=QUESTIONS.filter((q,i)=>!state.first[i].correct).map(q=>q.id);$("report").innerHTML="<h3>首次獨立："+right+"／12</h3><p>需追蹤題號："+escap(wrong.join("、")||"無首次答錯")+"。</p><p>12題均已完成逐題訂正；訂正不替代新題回測。</p>";}
+}
+function submitAnswer(unknown){const q=QUESTIONS[state.qPos];if(!q||state.stage!=="quiz")return;let a={id:q.id,gate:q.gate,kind:q.kind,submittedAt:new Date().toISOString(),unknown:unknown||null,value:null};if(!unknown){if(q.kind==="single"){const selected=document.querySelector('input[name="answer"]:checked');if(!selected){alert("請選答案，或按「不懂」");return;}a.value=Number(selected.value);}else if(q.kind==="multi"){a.value=[];for(let i=0;i<4;i++){let item=document.querySelector('input[name="pair'+i+'"]:checked');if(!item){alert("請先對 A、B、C、D 各自選擇正確或錯誤");return;}a.value.push(item.value==="true");}}else{a.value=$("textAnswer").value.trim();if(!a.value){alert("請填寫輸出，或按「不懂」");return;}}}a.correct=correct(q,a);state.first.push(a);state.history.push({event:"first_answer",id:q.id,correct:a.correct,at:a.submittedAt});state.qPos++;if(state.qPos>=12)state.stage="review";persist();render();}
+function doneReview(){if(state.stage!=="review")return;const q=QUESTIONS[state.rPos],radio=document.querySelector('input[name="understanding"]:checked');if(!radio){alert("請選訂正後理解狀態");return;}if(!$("rConfirm").checked){alert("請先核對原答、正解與解析");return;}const reason=$("rReason").value.trim();if(radio.value==="understand"&&!state.first[state.rPos].correct&&reason.replace(/\s/g,"").length<8){alert("這題首次答錯；請至少寫 8 字解釋，並由家長核對內容。");return;}
+state.reviews.push({id:q.id,understanding:radio.value,reason,acknowledged:true,reasonStatus:"PARENT_REVIEW_PENDING",at:new Date().toISOString()});state.history.push({event:"review_acknowledged",id:q.id,at:new Date().toISOString()});state.rPos++;if(state.rPos>=12){state.stage="finish";state.completedAt=new Date().toISOString();}persist();render();}
+function exportObject(){return {schema:SCHEMA,version:VERSION,generatedAt:new Date().toISOString(),policy:"NO_AUTOMATIC_MASTERY",previousWeakness:{originId:"A207",gate4:"ACTIVE_UNSTABLE",gate6:"ACTIVE_UNSTABLE",mastery:"NOT_MASTERED_DELAYED_PENDING",notReassessedHere:true},data:{...state,questions:QUESTIONS.map(q=>({id:q.id,gate:q.gate,kind:q.kind,prompt:q.prompt,code:q.code,options:q.opts||null,answerKey:q.key,explanation:q.why}))},metrics:{answered:state.first.length,firstCorrect:state.first.filter(x=>x.correct).length,firstWrongOrUnknown:state.first.filter(x=>!x.correct).length,reviews:state.reviews.length},mastery:"NOT_MASTERED_INITIAL_AND_DELAYED_PENDING"};}
+function json(){return JSON.stringify(exportObject(),null,2);}
+function filename(){return "enxiang_1-2B_new12_"+new Date().toISOString().slice(0,10)+".json";}
+function exportOpen(){$("raw").classList.add("hide");$("exportStatus").textContent="首次答題 "+state.first.length+"／12；已訂正 "+state.reviews.length+"／12";showStage("export");}
+function file(){return new File([json()],filename(),{type:"application/json"});}
+$("begin").addEventListener("click",()=>{if(Date.now()<CAN_START_AFTER){alert("請先完成今晚 1-1B-R1。此卷最早於台灣時間 10/23 22:31 後開放。");return;}if(!$("r1Confirmed").checked){alert("請先確認 1-1B-R1 已完成，再進入新題，避免污染延遲測驗。");return;}state.startedAt=new Date().toISOString();state.stage="quiz";state.history.push({event:"start",at:state.startedAt,prerequisiteConfirmed:true});persist();render();});
+$("submit").addEventListener("click",()=>submitAnswer(null));document.querySelectorAll(".unknown").forEach(b=>b.addEventListener("click",()=>submitAnswer(b.dataset.reason)));
+$("reviewNext").addEventListener("click",doneReview);$("topExport").addEventListener("click",exportOpen);$("finishExport").addEventListener("click",exportOpen);$("back").addEventListener("click",render);
+$("show").addEventListener("click",()=>{$("raw").value=json();$("raw").classList.remove("hide");$("exportStatus").textContent="已顯示可供全選複製的 JSON 原文。";});
+$("copy").addEventListener("click",async()=>{let v=json();try{await navigator.clipboard.writeText(v);$("exportStatus").textContent="已複製完整 JSON";}catch(e){$("raw").value=v;$("raw").classList.remove("hide");$("raw").select();$("exportStatus").textContent="無法自動複製，請長按文字自行複製。";}});
+$("download").addEventListener("click",()=>{try{const url=URL.createObjectURL(new Blob([json()],{type:"application/json"}));const a=document.createElement("a");a.href=url;a.download=filename();document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),5000);$("exportStatus").textContent="已嘗試下載；iPhone 若未出現檔案，請選分享或原文。";}catch(e){$("raw").value=json();$("raw").classList.remove("hide");$("exportStatus").textContent="下載不可用，已顯示原文。";}});
+$("share").addEventListener("click",async()=>{try{const f=file();if(!navigator.share||!navigator.canShare||!navigator.canShare({files:[f]}))throw Error("unavailable");await navigator.share({files:[f],title:"恩翔 Python 1-2B 學習紀錄"});$("exportStatus").textContent="已完成分享操作，請確認檔案已實際儲存。";}catch(e){$("raw").value=json();$("raw").classList.remove("hide");$("exportStatus").textContent="未完成檔案分享；已提供可複製 JSON 全文，亦可試一般下載。";}});
+$("unlockNote").textContent=Date.now()<CAN_START_AFTER?"尚未到最早開放時間（台灣 10/23 22:31）；請先完成 1-1B-R1。":"開放時間已到；仍需確認已完成 1-1B-R1 才能開始。";
+if(state.first.length>12||state.reviews.length>12){$("saveStatus").textContent="偵測到異常資料，請聯絡家長";}else{persist();render();}
+</script>
+</body></html>
