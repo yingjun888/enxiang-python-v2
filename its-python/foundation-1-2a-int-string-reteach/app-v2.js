@@ -104,16 +104,17 @@ function render(){
  if(w.phase==='transfer'){
   const q=g.transfer[Math.min(w.transfers.length,g.transfer.length-1)];
   p.innerHTML='<span class="tag">第 '+g.gate+' 關｜不同情境回測 '+(w.transfers.length+1)+'</span>'+
-  '<p class="small">這個回測已經有前面的講解，所以即使答對，也只能算補教後通過，不是無提示獨立測驗。</p>'+questionHTML(q);
+  '<p class="small">這個回測已經有前面的講解，所以即使答對，也只能算補教後通過，不是無提示獨立測驗。</p>'+
+  (w.transfers.length>=2?'<p class="notice warn">兩題新的變式已使用完畢，接下來是<b>重複已看過的練習題</b>；即使答對也不當作新的Transfer驗證，需家長另給新題。</p>':'')+questionHTML(q);
   if(g.gate===6)p.innerHTML+='<p><b>請用自己的話解釋（至少8字）</b></p><textarea id="reason" placeholder="誰被重新指派？"></textarea>';
   appendControls(p,[btn('transferSubmit','確定回測答案',()=>submitTransfer(false)),btn('transferUnknown','回測仍不知道',()=>submitTransfer(true),'')]);return
  }
  if(w.phase==='transferFeedback'){
   const r=w.transfers.at(-1),q=g.transfer[Math.min(w.transfers.length-1,g.transfer.length-1)];
   p.innerHTML='<span class="tag">第 '+g.gate+' 關｜回測結果</span>'+detail(q,r)+
-  (r.correct?'<p class="notice good">這是<b>補教後回測通過</b>。'+(g.gate===6?'最後一關理由另待家長人工確認。':'')+' 仍需跨日無提示新題驗證。</p>':
+  (r.correct?'<p class="notice good">'+(r.assessment==='REPEATED_VISIBLE_ITEM_PRACTICE'?'<b>已見過題目的練習答對</b>，不能當成新題Transfer通過；必須由家長另給新題。':'這是<b>補教後不同情境回測通過</b>。')+(g.gate===6?'最後一關理由另待家長人工確認。':'')+' 仍需跨日無提示新題驗證。</p>':
     '<p class="notice warn">這一題仍有概念缺口，<b>不會直接進下一關，也不會清除錯誤紀錄</b>。你可以繼續分步補教，或先暫停請大人協助。</p>');
-  if(r.correct)p.appendChild(btn('advanceGate',g.gate===6?'查看本次補教摘要':'保留證據｜進下一關',()=>{w.finishedAt=iso();w.status=g.gate===6?'REASON_REVIEW_AND_DELAYED_PENDING':'GUIDED_PASS_DELAYED_PENDING';log('gate_finished',{status:w.status});S.gatePos++;if(S.gatePos===5)S.completedAt=iso();save();render()}));
+  if(r.correct)p.appendChild(btn('advanceGate',g.gate===6?'查看本次補教摘要':'保留證據｜進下一關',()=>{w.finishedAt=iso();w.status=r.assessment==='REPEATED_VISIBLE_ITEM_PRACTICE'?'PRACTICE_ONLY_PARENT_REVIEW_REQUIRED':g.gate===6?'REASON_REVIEW_AND_DELAYED_PENDING':'GUIDED_PASS_DELAYED_PENDING';log('gate_finished',{status:w.status});S.gatePos++;if(S.gatePos===5)S.completedAt=iso();save();render()}));
   else if(w.transfers.length>=g.transfer.length){
    p.innerHTML+='<p class="notice bad">本關已經做完三道不同的補教後變式，仍未通過。繼續重刷同一題可能只是背答案，因此本關轉交大人協助，所有失敗原答保留。</p>';
    p.appendChild(btn('escalate','保留失敗與學習證據｜轉人工補教',()=>{
@@ -143,7 +144,7 @@ function submitTransfer(unknown){
  const q=g.transfer[Math.min(w.transfers.length,g.transfer.length-1)];
  const v=unknown?-1:readChoice();if(v===null)return;
  const reason=unknown?'':g.gate===6?wantReason():'';if(reason===null)return;
- const r=makeRecord(q,v,unknown,reason);w.transfers.push(r);w.status=r.correct?'TRANSFER_GUIDED_PASS_NOT_MASTERED':'OPEN_NEEDS_RETEACHING';w.phase='transferFeedback';
+ const r=makeRecord(q,v,unknown,reason);r.assessment=w.transfers.length>=2?'REPEATED_VISIBLE_ITEM_PRACTICE':'NEW_VARIANT_GUIDED_TRANSFER';w.transfers.push(r);w.status=r.correct?(r.assessment==='REPEATED_VISIBLE_ITEM_PRACTICE'?'PRACTICE_ONLY_PARENT_REVIEW_REQUIRED':'TRANSFER_GUIDED_PASS_NOT_MASTERED'):'OPEN_NEEDS_RETEACHING';w.phase='transferFeedback';
  log('transfer_attempt',{correct:r.correct,unknown,attempt:w.transfers.length});save();render();
 }
 function renderDone(){
