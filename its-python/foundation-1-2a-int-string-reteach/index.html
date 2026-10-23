@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#194b80"><title>恩翔 Python 1-2A｜A207 第二輪型別轉換補教</title>
+<meta name="theme-color" content="#194b80"><title>恩翔 Python 1-2A｜A207 基礎錯因重新補教 V2</title>
 <style>
 :root{--bg:#f1f5fb;--ink:#1b2d41;--sub:#526577;--edge:#d1dfed;--blue:#235f9d;--bad:#a22f37;--good:#126c4a}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.65 -apple-system,BlinkMacSystemFont,system-ui,"Noto Sans TC","Microsoft JhengHei",sans-serif}
@@ -11,66 +11,17 @@ pre{background:#162d44;color:white;padding:15px;border-radius:12px;white-space:p
 button{font:inherit;font-weight:750;cursor:pointer;min-height:54px;background:#f4f9ff;color:#17497e;border-radius:11px;border:1px solid #abc7e4;padding:12px 14px;margin:7px 0;width:100%}button.primary{background:var(--blue);border-color:var(--blue);color:#fff}button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #d58d23;outline-offset:2px}
 input[type=text]{width:100%;padding:13px;border:2px solid #c5d5e5;border-radius:11px;min-height:55px;font:inherit}textarea{width:100%;border:2px solid #c5d5e5;border-radius:11px;padding:12px;font:inherit;min-height:100px;resize:vertical}.raw{min-height:220px;font:13px/1.5 monospace}.hide{display:none!important}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.progress{height:9px;background:#d8e6f2;border-radius:9px;overflow:hidden;margin:11px 0}.progress div{background:var(--blue);height:100%;width:0%}footer{font-size:13px;color:var(--sub)}@media(max-width:480px){.card{padding:16px}.row{grid-template-columns:1fr}}
 </style></head><body><main>
-<header class="card"><span class="tag">1-2A｜A207 補教候選 V1</span><h1>恩翔 Python：型別轉換補教與接續六關</h1>
-<p class="sub">沿用原六連問第 1 關已通過的證據；只做第 2～6 關的不同題型驗證，不重考原本 12 題。</p>
+<header class="card"><span class="tag">1-2A｜A207 補教修正版 V2</span><h1>恩翔 Python：型別轉換補教與接續六關</h1>
+<p class="sub">延續先前A207的錯因，從「轉換新值」與「原變數」開始分步補教。新題、逐項解析、微觀念確認和變式回測都保留紀錄；不重考原本12題，也不改寫昨天V1。</p>
 <p class="small sub" id="stateInfo">讀取進度中…</p><div class="progress"><div id="progress"></div></div></header>
 <section class="card" id="panel" aria-live="polite"></section>
 <section class="card" id="exports"><h2>匯出本次補教／回測證據</h2>
-<p class="small sub">原始 1-2A 與六連問 JSON 必須另外保存。本頁不會修改舊紀錄，也不會自動將成績上傳 GitHub。</p>
+<p class="small sub">這一份是補教修正版 V2；原始1-2A初測、原六連問與昨天V1紀錄各自獨立保留。本頁只讀取同瀏覽器的舊V1作匯出佐證，不會修改。</p>
 <button class="primary" id="share">iPhone 分享／儲存到「檔案」</button>
 <div class="row"><button id="download">下載 JSON</button><button id="copy">複製 JSON</button></div>
 <button id="show">顯示 JSON 原文</button><textarea class="raw hide" id="raw" readonly aria-label="完整學習證據 JSON"></textarea>
 <p class="small sub" role="status" id="exportStatus">可隨時備份目前進度。</p></section>
-<footer>階段：補教後的新題驗證。即使全對，也只可標記「待無提示延遲回測」，不得標記 MASTERED。1-1B-R1 原時間及資料完全獨立。</footer>
-</main><script>
-'use strict';
-const VERSION='ITS_1_2A_INT_STRING_RETEACH_V1',SCHEMA='enxiang.python.lecture.1-2a.int-string-reteach.v1',KEY='enxiang_its_python_1_2a_int_string_reteach_v1';
-const Q=[
-{gate:2,stage:'操作對象與狀態',kind:'single',p:'先看變數 s 的型別，再看 m 的數值，最後會輸出什麼？',code:'s = "9.6"\nn = float(s)\nm = int(n)\nprint(type(s).__name__, m)',o:['str 9','float 9','str 10','ValueError'],key:0,
-why:'float(s) 產生新的浮點值 9.6；int(n) 產生整數 9。沒有寫 s = ...，所以 s 仍是字串。',
-retry:{kind:'single',p:'換一組數值：這次輸出什麼？',code:'s = "4.7"\nn = float(s)\nprint(type(s).__name__, int(n))',o:['float 4','str 4','str 5','ValueError'],key:1}},
-{gate:3,stage:'直接條件應用',kind:'text',p:'請自行輸入 print() 輸出的完整內容。',code:'print(int(float("12.4")))',key:'12',
-why:'float("12.4") 先得到 12.4，int(12.4) 再朝 0 截斷成整數 12。',
-retry:{kind:'text',p:'不同數值，請寫出輸出。',code:'print(int(float("9.9")))',key:'9'}},
-{gate:4,stage:'條件改變',kind:'single',p:'若去掉 float() 中間步驟，程式會發生什麼事？',code:'print(int("12.4"))',o:['12','12.4','ValueError','13'],key:2,
-why:'字串 "12.4" 不是合法的整數字串，int() 直接處理它會出現 ValueError。',
-retry:{kind:'single',p:'條件改為以下字串時，結果如何？',code:'s = "6.2"\nprint(int(s))',o:['ValueError','6','6.2','7'],key:0}},
-{gate:5,stage:'跨概念連結',kind:'single',p:'先辨別字串，再辨別整數，這行輸出什麼？',code:'s = "0"\nn = int(s)\nprint(bool(s), bool(n))',o:['False False','True False','True True','False True'],key:1,
-why:'字串 "0" 不是空字串，所以 bool(s) 是 True；整數 n=0，所以 bool(n) 是 False。',
-retry:{kind:'single',p:'這兩個變數的型別依序是什麼？',code:'s = "0"\nn = int(s)\nprint(type(s).__name__, type(n).__name__)',o:['int int','str str','str int','int str'],key:2}},
-{gate:6,stage:'陷阱辨識／說明理由',kind:'single',p:'有人認為：經過 int(float(a))，原本 a 也會變成整數。請判斷輸出，並寫理由。',code:'a = "7.8"\nb = int(float(a))\nprint(a, b)',o:['7 7','7.8 8','ValueError','7.8 7'],key:3,reason:true,
-why:'右側運算只把新整數交給 b；原本 a 沒有重新指派，仍保留字串 "7.8"。請用自己的話說明。',
-retry:{kind:'single',p:'換成沒有接住回傳值的寫法，印出什麼？請寫理由。',code:'a = "3.9"\nint(float(a))\nprint(a)',o:['3','4','ValueError','3.9'],key:3,reason:true}}
-];
-const $=id=>document.getElementById(id),iso=()=>new Date().toISOString();
-const escapeHTML=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const fresh=()=>({schema:SCHEMA,version:VERSION,source:{originalFoundation:'ITS_1_2A_FOUNDATION_V1',originalGateVersion:'ITS_1_2A_SIX_GATE_V1',originId:'A207',originalGate1:'INDEPENDENT_PASS_FROM_PARENT_EXPORT',originalGate2:'NEEDS_RETEACHING_FROM_PARENT_EXPORT',preserveOriginal:true},createdAt:iso(),startedAt:null,completedAt:null,index:0,phase:'lesson',results:[],history:[]});
-let S;try{S=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){}
-if(!S||S.version!==VERSION||!Array.isArray(S.results))S=fresh();
-const status=()=>S.phase==='done'?(S.results.some(x=>x.status==='NEEDS_RETEACHING')?'OPEN_NEEDS_RETEACHING':S.results.some(x=>x.status==='REASON_REVIEW_REQUIRED')?'REMEDIATED_REASON_REVIEW_AND_DELAYED_PENDING':'REMEDIATED_DELAYED_PENDING'):'IN_PROGRESS';
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){$('exportStatus').textContent='目前無法本機存檔，請立即匯出 JSON。'}}
-function result(q){let r=S.results.find(x=>x.gate===q.gate);if(!r){r={gate:q.gate,stage:q.stage,first:null,retry:null,status:'IN_PROGRESS'};S.results.push(r)}return r}
-function blockLater(){for(let i=S.index+1;i<Q.length;i++){let q=Q[i];S.results.push({gate:q.gate,stage:q.stage,first:null,retry:null,status:'BLOCKED_BY_PREREQUISITE'})}}
-function finish(){S.phase='done';S.completedAt=S.completedAt||iso()}
-function advance(){S.index++;S.phase='first';if(S.index>=Q.length)finish()}
-function progress(){let n=S.results.filter(r=>r.first!==null).length;$('progress').style.width=(20*n)+'%';$('stateInfo').textContent='補教回測：第 2～6 關｜已首次回答 '+n+'/5｜'+(S.phase==='done'?'本次結束':'獨立保存，不影響舊紀錄')}
-function items(q){let out=q.kind==='text'?'<label for="answer" class="sub">請填入真正輸出的內容</label><input id="answer" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="例如 12">':'<div role="radiogroup" aria-label="選擇題">'+q.o.map((o,i)=>'<label class="choice"><input type="radio" name="ans" value="'+i+'"><span>'+('ABCD'[i])+'. '+escapeHTML(o)+'</span></label>').join('')+'</div>';if(q.reason)out+='<label for="reason"><b>請用自己的話解釋原變數為什麼改變或沒有改變（至少 8 字）</b></label><textarea id="reason" placeholder="不可只寫選項或抄程式碼"></textarea>';return out}
-function render(){progress();let p=$('panel');if(S.phase==='lesson'){p.innerHTML='<h2>先補教：轉換產生新值，不代表改變原變數</h2><p>一行一行看：先確認 <b>s</b> 裝的是什麼，再確認接收新結果的是誰。</p><pre>s = "8.6"       # s 是字串\nn = float(s)    # n 是浮點數 8.6\nm = int(n)      # m 是整數 8\nprint(s, m)     # 8.6 8</pre><p class="notice">除非寫出 <code>s = ...</code> 重新指派，否則 <code>float(s)</code> 不會偷偷修改 s。</p><p class="notice warn">這次只接續 A207 原先沒過的能力，不重做 round() 已通過的六關，也不會更新原始測驗答案。</p><button id="begin" class="primary">理解後開始｜5 個不同題型</button>';$('begin').onclick=()=>{S.startedAt=S.startedAt||iso();S.phase='first';save();render()};return}
-if(S.phase==='done'){let n=S.results.filter(r=>r.first?.correct).length,z=S.results.filter(r=>r.status==='POST_RETEACH_PASS').length;let res=status();p.innerHTML='<h2>本次補教回測已結束</h2><p><b>首次答對：</b>'+n+'/5；<b>補教後換題通過：</b>'+z+'；<b>本次狀態：</b>'+escapeHTML(res)+'</p><p class="notice '+(res==='REMEDIATED_DELAYED_PENDING'?'good':'warn')+'">原始 A207 第二關仍保留失敗紀錄，這次是新增改善證據；還需跨日無提示延遲回測，不能直接標記已精熟。</p><p>請匯出本次 JSON 並與先前兩份 JSON 一起交給家長。</p>';return}
-let q=Q[S.index], r=result(q);if(S.phase==='reteach'){p.innerHTML='<span class="tag">第 '+q.gate+' 關｜補教</span><h2>首次答案未通過</h2><p class="notice bad">已保存第一次作答，不會改寫成答對。</p><p class="notice">'+escapeHTML(q.why)+'</p><p>接著用另一題確認；即使改答正確，也會標記為補教後通過。</p><button class="primary" id="next">看懂後做換題確認</button>';$('next').onclick=()=>{S.phase='retry';save();render()};return}
-let v=S.phase==='retry'?q.retry:q;p.innerHTML='<span class="tag">A207｜第 '+q.gate+'/6 關</span><p class="small sub">'+escapeHTML(q.stage)+'｜'+(S.phase==='retry'?'補教後換題確認':'第一次作答')+'</p><h2>'+escapeHTML(v.p)+'</h2><pre>'+escapeHTML(v.code)+'</pre>'+items(v)+'<button class="primary" id="submit">鎖定本次答案</button><button id="unknown">我目前不知道怎麼判斷</button><p class="small sub">答錯會留下紀錄並提供補教；同一關換題仍錯時阻擋後續題，不靠一直猜通關。</p>';$('submit').onclick=()=>submit(false);$('unknown').onclick=()=>submit(true)}
-function submit(unknown){if(S.phase!=='first'&&S.phase!=='retry')return;let q=Q[S.index],v=S.phase==='retry'?q.retry:q,r=result(q),resp=unknown?null:(v.kind==='text'?$('answer').value.trim():document.querySelector('input[name=ans]:checked')?.value),reason=unknown?'':(v.reason?$('reason').value.trim():'');
-if(!unknown&&(resp==null||resp==='')){alert('先填寫或選擇答案；真的不知道可選「我目前不知道怎麼判斷」。');return}
-if(!unknown&&v.reason&&reason.length<8){alert('請至少寫 8 字，說明轉換與原變數的關係。');return}
-let record={response:resp,kind:v.kind,unknown,reason,correct:!unknown&&String(resp)===String(v.key),submittedAt:iso()};
-if(S.phase==='first'){if(r.first)return;r.first=record;if(record.correct){r.status=q.gate===6?'REASON_REVIEW_REQUIRED':'POST_RETEACH_FIRST_PASS';advance()}else{r.status='NEEDS_RETEACHING';S.phase='reteach'}}
-else{if(r.retry)return;r.retry=record;if(record.correct){r.status=q.gate===6?'REASON_REVIEW_REQUIRED':'POST_RETEACH_PASS';advance()}else{r.status='NEEDS_RETEACHING';blockLater();finish()}}
-S.history.push({event:'submit',gate:q.gate,mode:r.retry?'retry':'first',correct:record.correct,time:record.submittedAt});save();render()}
-function payload(){let d=JSON.parse(JSON.stringify(S));d.exportedAt=iso();d.status=status();d.mastery='NOT_MASTERED_DELAYED_PENDING';d.metrics={firstAnswered:d.results.filter(x=>x.first).length,firstCorrect:d.results.filter(x=>x.first?.correct).length,promptedPass:d.results.filter(x=>x.status==='POST_RETEACH_PASS').length,blocked:d.results.filter(x=>x.status==='BLOCKED_BY_PREREQUISITE').length,reasonNeedsReview:d.results.some(x=>x.status==='REASON_REVIEW_REQUIRED')};return d}
-function json(){return JSON.stringify(payload(),null,2)}function fileName(){return 'enxiang_python_1-2A_A207_reteach_'+new Date().toLocaleDateString('sv-SE',{timeZone:'Asia/Taipei'})+'.json'}
-function show(){ $('raw').value=json();$('raw').classList.remove('hide');$('exportStatus').textContent='已顯示原始 JSON；可長按複製' }
-function download(){try{let b=new Blob([json()],{type:'application/json;charset=utf-8'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=fileName();document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),3000);$('exportStatus').textContent='已要求下載，請至 iPhone「檔案」確認成功'}catch(e){show()}}
-$('share').onclick=async()=>{try{let f=new File([json()],fileName(),{type:'application/json'});if(navigator.canShare?.({files:[f]})&&navigator.share){await navigator.share({files:[f],title:'恩翔 Python 1-2A A207 補教紀錄'});$('exportStatus').textContent='分享視窗已開啟，請確認確實儲存';return}}catch(e){$('exportStatus').textContent='分享取消或失敗；可用下載、複製、顯示原文';return}download()};
-$('download').onclick=download;$('copy').onclick=async()=>{try{await navigator.clipboard.writeText(json());$('exportStatus').textContent='已複製完整 JSON'}catch(e){show()}};$('show').onclick=show;
-save();render();
-</script></body></html>
+<footer>階段：A207逐步補教V2。答錯先知道是哪一步，再練2個微觀念及新情境；不會把答對直接視為已精熟。若補教仍錯，保留OPEN並可再補教。1-1B-R1原資料不變。</footer>
+</main>
+<script defer src="./data-v2.js"></script><script defer src="./app-v2.js"></script>
+</body></html>
