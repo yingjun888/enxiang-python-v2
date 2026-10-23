@@ -81,7 +81,7 @@ const initial = () => ({schema:SCHEMA,version:VERSION,createdAt:iso(),firstStart
 let S;
 try { const previous = JSON.parse(localStorage.getItem(STORE)||"null");S=previous && previous.schema===SCHEMA ? previous : initial(); }
 catch(e) { S=initial(); }
-let origin="intro", questionStarted=Date.now();
+let origin="intro";
 function persist(){ try { localStorage.setItem(STORE,JSON.stringify(S)); } catch(e){ $("status").textContent="此瀏覽器無法保存作答，請即時匯出JSON。"; } }
 function safe(s){return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 function shown(id){for(const x of ["intro","quiz","review","summary","export"])$(x).classList.toggle("hidden",x!==id);origin=id;window.scrollTo(0,0);}
@@ -134,15 +134,15 @@ function renderQuiz(q){
    const txt=document.createElement("span");txt.className="option-text";txt.textContent=o;
    label.append(input,marker,txt);div.appendChild(label);
  });
- questionStarted=Date.now();
+ if(!S.questionStartId || S.questionStartId!==q.id){S.questionStartId=q.id;S.questionStartAt=iso();persist();}
 }
 function saveAnswer(unknown){
  const q=nextQuiz();if(!q)return;
  let selected=[...document.querySelectorAll('input[name="answer"]:checked')].map(x=>x.value);
  if(!unknown&&!selected.length){alert("請選答案，或按「我不會／不確定」。");return;}
- const a={unknown:unknown?"uncertain":null,choice:null,selected:[],seconds:Math.max(0,(Date.now()-questionStarted)/1000),submittedAt:iso()};
+ const a={unknown:unknown?"uncertain":null,choice:null,selected:[],seconds:Math.max(0,(Date.now()-Date.parse(S.questionStartAt||iso()))/1000),submittedAt:iso()};
  if(!unknown){if(q.type==="multi")a.selected=selected.sort();else a.choice=selected[0];}
- a.correct=equality(q,a);S.answers[q.id]=a;persist();render();
+ a.correct=equality(q,a);S.answers[q.id]=a;S.questionStartId=null;S.questionStartAt=null;persist();render();
 }
 function renderReview(q){
  let i=QUESTIONS.indexOf(q),a=S.answers[q.id];
@@ -190,7 +190,7 @@ function exportData(){
     standardAnswer:complete?keyDisplay(q):null,correctExplanation:complete?q.why:null,
     optionExplanations:complete?q.optionWhy:null,
     wrongAnswerDiagnosis:complete&&!a.correct?diagnosis(q,a):null,
-    initialResponse:a,review:S.reviews[q.id]||null
+    initialResponse:complete?a:{...a,correct:null},review:S.reviews[q.id]||null
    };
  });
  const missed=QUESTIONS.filter(q=>S.answers[q.id]&&!S.answers[q.id].correct).map(q=>q.id);
@@ -201,7 +201,7 @@ function exportData(){
    source:{teacherLecture:"ITS Python 重點講義 §1-3",unit:"1-3B 字串運算、常用方法與字串比較",pages:"印刷6–7頁（PDF第7–8頁）",assessmentType:"NEW_UNIT_INITIAL_DIAGNOSTIC",previousMasterUnchanged:true},
    createdAt:S.createdAt,firstStartedAt:S.firstStartedAt,exportedAt:iso(),finishedAt:S.finishedAt,
    answers:result,
-   metrics:{answered:countAnswered(),initialCorrect:QUESTIONS.filter(q=>S.answers[q.id]?.correct).length,reviewed:QUESTIONS.filter(q=>S.reviews[q.id]?.confirmedAt).length,initialWrongIds:missed,unclearIds:unclear},
+   metrics:{answered:countAnswered(),initialCorrect:complete?QUESTIONS.filter(q=>S.answers[q.id]?.correct).length:null,reviewed:QUESTIONS.filter(q=>S.reviews[q.id]?.confirmedAt).length,initialWrongIds:complete?missed:[],unclearIds:unclear},
    mastery:state,parentReviewPending:true,gitSync:"EXPORT_AND_PARENT_UPLOAD_REQUIRED",deviceQa:"NOT_VERIFIED_ON_IPHONE"
  },null,2);
 }
