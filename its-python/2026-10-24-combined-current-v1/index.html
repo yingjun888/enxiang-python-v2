@@ -67,7 +67,7 @@ const RELEASE=Date.parse('2026-10-24T23:50:00+08:00'), ABC=['A','B','C','D'];
 function $(id){return document.getElementById(id);}
 const show=(id)=>{for(const v of ['intro','quiz','gate','review','finish','export'])$(v).classList.toggle('hidden',v!==id);};
 const now=()=>new Date().toISOString();
-const empty=()=>({schema:SCHEMA,version:VERSION,createdAt:now(),firstStartedAt:null,answers:{},reviews:{},firstReviewStartedAt:null,events:[]});
+const empty=()=>({schema:SCHEMA,version:VERSION,createdAt:now(),firstStartedAt:null,answers:{},reviews:{},openedAt:{},firstReviewStartedAt:null,events:[]});
 let S;try{S=JSON.parse(localStorage.getItem(STORE)||'null');}catch(e){}
 if(!S||S.version!==VERSION||!S.answers||!S.reviews)S=empty();
 let returnView='intro';let startStamp=null;
@@ -95,7 +95,7 @@ function render(){
  const r=currentReview();if(r){renderReview(r);return;}renderFinish();
 }
 function renderQuiz(q){
- show('quiz');$('qLabel').textContent=(doneFirst()+1)+'/22｜'+q.section;
+ show('quiz');if(!S.openedAt)S.openedAt={};if(!S.openedAt[q.id])S.openedAt[q.id]=now();persist();$('qLabel').textContent=(doneFirst()+1)+'/22｜'+q.section;
  $('qPrompt').textContent=q.prompt;$('qInfo').textContent=(q.mode==='NEW_UNIT_INITIAL_12Q_FROZEN_SOURCE'?'新單元首次診斷':'舊弱點新情境驗證')+'｜'+q.id;
  $('qCode').textContent=q.code||'';$('qCode').classList.toggle('hidden',!q.code);
  $('qTextArea').classList.toggle('hidden',q.kind!=='text');
@@ -108,7 +108,7 @@ function renderQuiz(q){
 function submitAnswer(unknown){
  let q=current();if(!q)return;
  if(q.section==='1-3A'&&Date.now()<RELEASE){render();return;}
- let a={id:q.id,kind:q.kind,section:q.section,mode:q.mode,unknown:Boolean(unknown),choice:null,marks:null,text:null,reasonFirst:q.requiresReason?$('reasonFirst').value.trim():'',submittedAt:now(),seconds:Math.round((Date.now()-(startStamp||Date.now()))/1000)};
+ let a={id:q.id,kind:q.kind,section:q.section,mode:q.mode,unknown:Boolean(unknown),choice:null,marks:null,text:null,reasonFirst:q.requiresReason?$('reasonFirst').value.trim():'',submittedAt:now(),seconds:Math.round((Date.now()-Date.parse(S.openedAt?.[q.id]||now()))/1000)};
  if(!unknown){
  if(q.kind==='single'){const v=document.querySelector('input[name=singleAnswer]:checked');if(!v){alert('請選一項，或按「不會／不確定」。');return;}a.choice=Number(v.value);}
  if(q.kind==='multi'){a.marks=[];for(let i=0;i<4;i++){let el=document.querySelector('input[name=mark'+i+']:checked');if(!el){alert('複選判斷題要 A～D 全部勾選正確或錯誤。');return;}a.marks.push(el.value==='correct');}}
