@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#164b7e">
+<title>恩翔 Python｜10/24 整合測驗 22 題</title>
+<style>
+:root{--paper:#fff;--bg:#eef3f9;--ink:#1c2c42;--muted:#536579;--border:#d4e0ee;--blue:#205e9e;--red:#b03942;--green:#14714e}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,BlinkMacSystemFont,"Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif}
+main{max-width:730px;margin:auto;padding:16px 14px 70px}h1{font-size:25px;margin:7px 0;line-height:1.35}h2{font-size:21px;margin:5px 0 12px}h3{font-size:17px}.tag{display:inline-block;border-radius:30px;padding:4px 11px;background:#dfebfb;color:#174c83;font-size:13px;font-weight:750}
+.card{background:var(--paper);border:1px solid var(--border);border-radius:17px;padding:20px;margin:14px 0;box-shadow:0 2px 12px #1c478310}
+.hidden{display:none!important}p{margin:9px 0}.small{font-size:14px;color:var(--muted)}.notice{padding:12px 14px;border-left:4px solid #2d6ead;background:#edf4fd;border-radius:8px;margin:13px 0}.warn{border-left-color:#ba8238;background:#fff5e4}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;font:15px/1.65 ui-monospace,Menlo,Consolas,monospace;background:#182b45;color:white;border-radius:10px;padding:14px}
+.choice{display:flex;gap:12px;align-items:flex-start;border:2px solid var(--border);padding:12px;border-radius:11px;margin:9px 0;min-height:54px;cursor:pointer}
+.choice:has(input:checked){border-color:var(--blue);background:#edf5fe}.choice input{width:22px;height:22px;flex:0 0 auto;margin:2px 0;accent-color:var(--blue)}.codeopt{white-space:pre-wrap;overflow-wrap:anywhere;font:14.5px/1.6 ui-monospace,Consolas,monospace}
+button{font:inherit;font-weight:700;color:#174e87;border:1px solid #bad0e4;background:#f6faff;border-radius:11px;padding:11px 13px;min-height:49px;cursor:pointer}
+button.primary{background:var(--blue);color:white;border-color:var(--blue)}button:disabled{opacity:.5;cursor:not-allowed}.actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:10px;margin:15px 0}
+input[type=text],textarea{font:inherit;background:white;color:var(--ink);border:2px solid var(--border);padding:12px;width:100%;border-radius:10px;min-height:53px}
+textarea{min-height:95px}button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #e9aa49;outline-offset:2px}.multiopt{border:1px solid var(--border);border-radius:10px;padding:10px;margin:8px 0}.multiopt .row{display:flex;gap:18px;margin-top:7px;flex-wrap:wrap}.multiopt label{display:flex;gap:7px;align-items:center;min-height:34px}
+.bar{height:9px;background:#dbe6f2;border-radius:8px;overflow:hidden;margin:12px 0}.bar>div{height:100%;background:#2671b6;width:0}.result{border-left:5px solid var(--green);border-radius:10px;background:#f2f7fc;padding:14px}.result.bad{border-left-color:var(--red)}
+#raw{height:240px;font:12px/1.45 ui-monospace,monospace}.splitline{border-bottom:1px solid var(--border);padding:9px 0}footer{font-size:13px;color:var(--muted);margin:22px 3px}
+@media(max-width:480px){h1{font-size:22px}.card{padding:15px}.actions{grid-template-columns:1fr}pre{font-size:14px}}
+</style></head><body><main>
+<header><span class="tag">2026/10/24｜Python 統合回測</span><h1>恩翔 Python｜22 題一次作答</h1>
+<p class="small">1-1B 弱點4題＋1-2A A207 2題＋1-2B 首測12題＋1-3A 切片4題。四單元獨立計分、首次答案鎖定。</p>
+<div class="bar"><div id="bar"></div></div><p id="status" class="small"></p></header>
+<section id="intro" class="card">
+<h2>整合卷使用說明</h2>
+<p>今天只需開一個測驗入口。前 18 題可先開始，最後 4 題「1-3A 隔日變式」須在台灣時間 <strong>10/24 23:50</strong> 後開放，確保與 10/23 晚間最後一輪同單元作答間隔滿 24 小時。</p>
+<div class="notice warn"><b>若要真的一口氣完成全部22題，請在10/24 23:50之後開始；也可先做18題並保留進度，隔日完成最後4題。</b> 裝置時間不可視為獨立可信授時，家長仍需核對時間。</div>
+<p>全部 22 題首次答案完成前不顯示解答；不知道請按「不會／不確定」，避免猜測。全卷完成後再逐題訂正，不能用訂正後的答案改掉首答。</p>
+<div class="actions"><button class="primary" id="begin">開始／繼續整合卷</button><button id="exportIntro">匯出目前紀錄</button></div></section>
+<section id="quiz" class="card hidden">
+<span class="tag" id="qLabel"></span><h2 id="qPrompt"></h2><p id="qInfo" class="small"></p><pre id="qCode" class="hidden"></pre>
+<div id="qChoices"></div><div id="qTextArea" class="hidden"><input id="qText" type="text" autocapitalize="off" autocomplete="off" spellcheck="false" placeholder="請輸入 Python 真正輸出的完整文字"></div>
+<div id="reasonPanel" class="hidden"><label for="reasonFirst">首次推理理由（需指出索引或規則）</label><textarea id="reasonFirst" placeholder="請寫實際取到的索引、stop 是否包含，家長會審核"></textarea></div>
+<div class="notice warn">鎖定首答後無法修改。多選題請對每一個 A–D 分別標示正確或錯誤。</div>
+<div class="actions"><button id="unknown">不會／不確定</button><button class="primary" id="submit">鎖定本題首答 →</button></div>
+<button id="exportQuiz">匯出目前紀錄</button></section>
+<section id="gate" class="card hidden"><h2>前 18 題已保存</h2>
+<p>剩下 4 題 1-3A 隔日切片測驗，2026/10/24 23:50（台灣時間）後才能進入。若不方便晚間作答，可明天再用同一網址恢復，已答的 18 題不會消失。</p>
+<div class="notice warn">尚未完成全部首答，因此暫不公開題目答案及診斷結果。</div>
+<div class="actions"><button id="resume" class="primary">確認時間／繼續剩餘4題</button><button id="exportGate">先匯出目前資料</button></div></section>
+<section id="review" class="card hidden"><span class="tag" id="rLabel"></span><h2 id="rPrompt"></h2><pre id="rCode" class="hidden"></pre>
+<div class="result" id="rFeedback"></div>
+<p><b>訂正後目前理解狀態</b></p>
+<label class="choice"><input type="radio" name="understanding" value="understand">我覺得理解（不代表已精熟）</label>
+<label class="choice"><input type="radio" name="understanding" value="unclear">仍不理解，須保留弱點</label>
+<textarea id="rNote" placeholder="若首答未通過，請用自己的話說明錯誤原因。"></textarea>
+<label class="choice"><input id="rChecked" type="checkbox">已核對原答與解釋，知道這不是隔日精熟證據</label>
+<div class="actions"><button class="primary" id="confirm">確認訂正／下一題 →</button><button id="exportReview">匯出目前紀錄</button></div></section>
+<section id="finish" class="card hidden"><h2>整合卷已完成</h2><div id="report"></div>
+<div class="notice warn">分段結果不互相替代；1-2B 是新單元首次取樣，1-1B 與 A207 需要再判定是否可關帳，1-3A 的解釋仍須家長核對。當下訂正不自動改成 MASTERED。</div>
+<div class="actions"><button class="primary" id="exportFinish">匯出完整 JSON 給家長</button></div></section>
+<section id="export" class="card hidden"><h2>匯出作答紀錄 JSON</h2>
+<p>學生資料僅存在本機，這裡不會自動寫入私人 Git。請將檔案傳給家長，再上傳 ChatGPT。</p>
+<p class="small" id="exportStatus"></p>
+<div class="actions"><button id="share" class="primary">iPhone 分享／儲存檔案</button><button id="download">下載 JSON</button><button id="copy">複製完整 JSON</button><button id="showRaw">顯示 JSON 原文</button><button id="back">返回測驗</button></div>
+<textarea id="raw" readonly class="hidden"></textarea></section>
+<footer>獨立儲存鍵：enxiang_python_20261024_combined22_v1。僅為新增測驗，不覆蓋任何既有 Master／成績／弱點判定。新版題目和 Python 輸出審查，與學生真機驗證分開。</footer>
+</main>
+<script>
+(function(){
+'use strict';
+const QUESTIONS=[{"id":"M1101","section":"1-1B","mode":"TARGETED_NEW_VARIANT","kind":"single","prompt":"下列程式輸出的型別名稱是什麼？","code":"values = {2, 5}\nprint(type(values).__name__)","opts":["set","dict","list","tuple"],"key":0,"why":"{2, 5} 內有兩個元素、沒有鍵值冒號，建立非空集合 set；不是字典。"},{"id":"M1102","section":"1-1B","mode":"TARGETED_NEW_VARIANT","kind":"single","prompt":"下列程式輸出的型別名稱是什麼？","code":"v = (9)\nprint(type(v).__name__)","opts":["tuple","str","list","int"],"key":3,"why":"(9) 只是加括號的整數表達式，沒有單元素元組必須的逗號，型別仍為 int。"},{"id":"M1103","section":"1-1B","mode":"TARGETED_NEW_VARIANT","kind":"single","prompt":"下列程式依序輸出哪兩個型別名稱？","code":"a = {}\nb = set()\nprint(type(a).__name__, type(b).__name__)","opts":["dict dict","set set","dict set","set dict"],"key":2,"why":"{} 建立空字典 dict；set() 才會建立空集合 set。"},{"id":"M1104","section":"1-1B","mode":"TARGETED_NEW_VARIANT","kind":"text","prompt":"請完整輸入這段 print 的兩個型別名稱（中間一個空格）。","code":"x = (2,)\ny = {3: 4}\nprint(type(x).__name__, type(y).__name__)","key":"tuple dict","why":"(2,) 有逗號所以是單元素 tuple；{3: 4} 有鍵值冒號，因此是 dict。"},{"id":"M1201","section":"1-2A","mode":"A207_TARGETED_VARIANT","kind":"single","prompt":"程式實際執行結果是哪一個？","code":"print(int(6.2), int('6.2'))","opts":["6 6","ValueError，且沒有輸出","6 6.2","TypeError，且沒有輸出"],"key":1,"why":"int(6.2) 可截去小數成為 6；但 int('6.2') 不能直接解析帶小數點的字串，會拋出 ValueError，print 不會印出部分結果。"},{"id":"M1202","section":"1-2A","mode":"A207_TARGETED_VARIANT","kind":"single","prompt":"下列程式最後印出的型別名稱為何？","code":"s = '8'\nint(s)\nprint(type(s).__name__)","opts":["str","int","float","ValueError"],"key":0,"why":"int(s) 會建立整數結果，但沒有重新指派給 s，所以原來的 s 仍是字串 str。"},{"id":"B201","gate":"基本轉換","kind":"single","prompt":"這段程式的結果是什麼？","code":"list(\"map\")","opts":["[\"map\"]","[\"m\", \"a\", \"p\"]","(\"m\", \"a\", \"p\")","ValueError"],"key":1,"why":"list() 會依序取得字串中的每個字元，建立串列；不會把整個字串當成唯一一個元素。","section":"1-2B","mode":"NEW_UNIT_INITIAL_12Q_FROZEN_SOURCE","sourceFrozen":true},{"id":"B202","gate":"基本轉換","kind":"single","prompt":"這段程式的結果是什麼？","code":"tuple([6, 9])","opts":["[6, 9]","([6, 9],)","('6', '9')","(6, 9)"],"key":3,"why":"tuple() 從串列建立元組，保留兩個整數元素，沒有自動轉成字串。","section":"1-2B","mode":"NEW_UNIT_INITIAL_12Q_FROZEN_SOURCE","sourceFrozen":true},{"id":"B203","gate":"型別與元素","kind":"single","prompt":"這段程式的結果是什麼？","code":"list((4, 7))","opts":["[4, 7]","(4, 7)","['4', '7']","TypeError"],"key":0,"why":"從元組轉換為串列後使用中括號，但元素依然是整數。","section":"1-2B","mode":"NEW_UNIT_INITIAL_12Q_FROZEN_SOURCE","sourceFrozen":true},{"id":"B204","gate":"字串轉元組","kind":"single","prompt":"這段程式的結果是什麼？","code":"tuple(\"up\")","opts":["('up',)","['u', 'p']","('u', 'p')","'up'"],"key":2,"why":"字串有兩個字元，tuple() 產生兩個字串元素的元組。","section":"1-2B","mode":"NEW_UNIT_INITIAL_12Q_FROZEN_SOURCE","sourceFrozen":true},{"id":"B205","gate":"錯誤辨識","kind":"single","prompt":"這個運算會得到什麼？","code":"list(9)","opts":["[9]","['9']","[]","TypeError"],"key":3,"why":"整數 9 不可迭代，所以 list(9) 會拋出 TypeError；要做單元素串列可寫 [9]。","section":"1-2B","mode":"NEW_UNIT_INITIAL_12Q_FROZEN_SOURCE","sourceFrozen":true},{"id":"B206","gate":"單元素元組","kind":"single","prompt":"這段程式的結果是什麼？","code":"tuple([3])","opts":["(3,)","(3)","[3]","((3,),)"],"key":0,"why":"只有一個元素的元組表示時需要逗號，輸出為 (3,)。","section":"1-2B","mode":"NEW_UNIT_INITIAL_12Q_FROZEN_SOURCE","sourceFrozen":true},{"id":"B207","gate":"元素型別不變","kind":"single","prompt":"這段程式會得到什麼？","code":"list([\"8\", 2])","opts":["[8, 2]","('8', 2)","['8', 2]","TypeError"],"key":2,"why":"list() 不會把元素 '8' 自動轉為整數；str '8' 與 int 2 仍各自保有型別。","section":"1-2B","mode":"NEW_UNIT_INITIAL_12Q_FROZEN_SOURCE","sourceFrozen":true},{"id":"B208","gate":"空容器轉換","kind":"single","prompt":"這段程式的結果是什麼？","code":"list(())","opts":["[()]","[]","()","TypeError"],"key":1,"why":"空元組是可迭代但沒有元素的容器，轉成串列後是空串列 []。","section":"1-2B","mode":"NEW_UNIT_INITIAL_12Q_FROZEN_SOURCE","sourceFrozen":true},{"id":"B209","gate":"敘述真偽","kind":"multi","prompt":"逐項判斷下列敘述是否正確（可以有多個正確）。","code":"","opts":["list(\"xy\") 的結果是 [\"x\", \"y\"]","tuple(2) 的結果是 (2,)","tuple([3, 4]) 的結果是 [3, 4]","list(()) 的結果是 []"],"key":[true,false,false,true],"why":"A、D 正確。整數 2 不可迭代，tuple(2) 是 TypeError；tuple([3,4]) 會產生元組 (3,4)，不是串列。","section":"1-2B","mode":"NEW_UNIT_INITIAL_12Q_FROZEN_SOURCE","sourceFrozen":true},{"id":"B210","gate":"追蹤輸出","kind":"text","prompt":"請輸入 print() 真正印出的文字。","code":"print(type(tuple([7, 1])).__name__)","key":"tuple","why":"tuple([7,1]) 建立元組；type(...).__name__ 取得型別名稱 tuple。","section":"1-2B","mode":"NEW_UNIT_INITIAL_12Q_FROZEN_SOURCE","sourceFrozen":true},{"id":"B211","gate":"追蹤輸出","kind":"text","prompt":"請依 Python 顯示格式，輸入整行輸出（包含逗號與括號）。","code":"print(tuple(\"q\"))","key":"('q',)","why":"單一字元字串轉換為單元素元組，Python 印出 ('q',)，逗號不能漏。","section":"1-2B","mode":"NEW_UNIT_INITIAL_12Q_FROZEN_SOURCE","sourceFrozen":true},{"id":"B212","gate":"混合元素","kind":"text","prompt":"請輸入 print() 真正印出的完整結果。","code":"print(list((True, \"0\", 5)))","key":"[True, '0', 5]","why":"list() 保留 bool、str、int 三種既有元素型別；字串 '0' 不會被轉成數字 0。","section":"1-2B","mode":"NEW_UNIT_INITIAL_12Q_FROZEN_SOURCE","sourceFrozen":true},{"id":"M1301","section":"1-3A","mode":"DELAYED_NEW_VARIANT","kind":"single","prompt":"請判斷此程式輸出何者？","code":"w = 'backpack'\nprint(w[3:])","opts":["ckpack","pack","backpack","kpack"],"key":3,"why":"字串從 0 開始索引；backpack 的索引 3 是 k，省略 stop 會包含 k 到最後一個字元。"},{"id":"M1302","section":"1-3A","mode":"DELAYED_NEW_VARIANT","kind":"single","prompt":"以下兩個切片依序印出哪兩段字串？","code":"s = 'carefully'\nprint(s[1:7:2], s[1::2])","opts":["aeul aeu","aeu aeu","aeu aeul","aul aeul"],"key":2,"why":"carefully 的索引 1,3,5,7 是 a,e,u,l；指定 stop=7 時不取 7，所以第一段 aeu；省略 stop 時可取到 7，第二段 aeul。"},{"id":"M1303","section":"1-3A","mode":"DELAYED_NEW_VARIANT","kind":"multi","prompt":"給定字串 s，下列四個敘述哪些為 True？請對 A–D 每一項判斷正確或錯誤。","code":"s = 'abcdefgh'","opts":["s[-7:-1:2] == 'bdf'","s[1:7:2] == 'bdf'","s[-7:-1:2] == 'bdfh'","s[1::2] == 'bdf'"],"key":[true,true,false,false],"why":"len=8，-7 等於索引 1；-1 等於索引 7（stop 不包含）。所以前兩項取索引 1,3,5 得 bdf。省略 stop 會多取索引 7 的 h。"},{"id":"M1304","section":"1-3A","mode":"DELAYED_NEW_VARIANT","kind":"text","prompt":"請輸入程式輸出，並在下方「首次推理理由」寫出實際取到的索引及為何沒有取到 stop。","code":"s = 'notebook'\nprint(s[2:6:2])","key":"tb","requiresReason":true,"why":"notebook 的索引 2 是 t、4 是 b，下一個索引 6 等於 stop=6，因為 stop 不包含所以只取 2、4，輸出 tb。"}];
+const VERSION='ITS_20261024_COMBINED22_V1', SCHEMA='enxiang.python.combined22.20261024.v1', STORE='enxiang_python_20261024_combined22_v1';
+const RELEASE=Date.parse('2026-10-24T23:50:00+08:00'), ABC=['A','B','C','D'];
+function $(id){return document.getElementById(id);}
+const show=(id)=>{for(const v of ['intro','quiz','gate','review','finish','export'])$(v).classList.toggle('hidden',v!==id);};
+const now=()=>new Date().toISOString();
+const empty=()=>({schema:SCHEMA,version:VERSION,createdAt:now(),firstStartedAt:null,answers:{},reviews:{},firstReviewStartedAt:null,events:[]});
+let S;try{S=JSON.parse(localStorage.getItem(STORE)||'null');}catch(e){}
+if(!S||S.version!==VERSION||!S.answers||!S.reviews)S=empty();
+let returnView='intro';let startStamp=null;
+function persist(){try{localStorage.setItem(STORE,JSON.stringify(S));$('status').textContent='已保存｜首答 '+doneFirst()+'/22；已訂正 '+doneReview()+'/22';}catch(e){$('status').textContent='儲存異常：請立刻匯出 JSON 並通知家長';}}
+const doneFirst=()=>QUESTIONS.filter(q=>S.answers[q.id]&&S.answers[q.id].submittedAt).length;
+const doneReview=()=>QUESTIONS.filter(q=>S.reviews[q.id]&&S.reviews[q.id].confirmedAt).length;
+function current(){return QUESTIONS.find(q=>!S.answers[q.id]||!S.answers[q.id].submittedAt);}
+function currentReview(){return QUESTIONS.find(q=>!S.reviews[q.id]||!S.reviews[q.id].confirmedAt);}
+function escapeHTML(s){return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function validReason(t){let x=t.trim();return x.length>=8&&!/^(.)\1+$/.test(x)&&new Set(x.replace(/\s/g,'')).size>=3;}
+function answerCorrect(q,a){
+ if(a.unknown)return false;
+ if(q.kind==='single')return a.choice===q.key;
+ if(q.kind==='multi')return Array.isArray(a.marks)&&a.marks.length===4&&a.marks.every((v,i)=>v===q.key[i]);
+ return (a.text||'').trim()===q.key;
+}
+function keyLabel(q){if(q.kind==='single')return ABC[q.key]+'｜'+q.opts[q.key];if(q.kind==='multi')return q.key.map((v,i)=>ABC[i]+':'+(v?'正確':'錯誤')).join('、');return q.key;}
+function answerLabel(q,a){if(!a||a.unknown)return '不會／不確定';if(q.kind==='single')return ABC[a.choice]+'｜'+q.opts[a.choice];if(q.kind==='multi')return a.marks.map((v,i)=>ABC[i]+':'+(v?'正確':'錯誤')).join('、');return a.text||'(空白)';}
+function stats(){const z={};for(const q of QUESTIONS){if(!z[q.section])z[q.section]={answered:0,correct:0,total:0,wrongIds:[]};const b=z[q.section];b.total++;const a=S.answers[q.id];if(a){b.answered++;if(doneFirst()===22&&answerCorrect(q,a))b.correct++;else if(doneFirst()===22)b.wrongIds.push(q.id);}}return z;}
+function render(){
+ persist();$('bar').style.width=String(Math.round(doneFirst()/22*100))+'%';
+ if(!S.firstStartedAt){show('intro');return;}
+ const q=current();
+ if(q){if(q.section==='1-3A'&&Date.now()<RELEASE){show('gate');return;}renderQuiz(q);return;}
+ const r=currentReview();if(r){renderReview(r);return;}renderFinish();
+}
+function renderQuiz(q){
+ show('quiz');$('qLabel').textContent=(doneFirst()+1)+'/22｜'+q.section;
+ $('qPrompt').textContent=q.prompt;$('qInfo').textContent=(q.mode==='NEW_UNIT_INITIAL_12Q_FROZEN_SOURCE'?'新單元首次診斷':'舊弱點新情境驗證')+'｜'+q.id;
+ $('qCode').textContent=q.code||'';$('qCode').classList.toggle('hidden',!q.code);
+ $('qTextArea').classList.toggle('hidden',q.kind!=='text');
+ $('reasonPanel').classList.toggle('hidden',!q.requiresReason);
+ $('qText').value='';$('reasonFirst').value='';
+ const wrap=$('qChoices');wrap.textContent='';
+ if(q.kind==='single')q.opts.forEach((opt,i)=>{let line=document.createElement('label');line.className='choice';const radio=document.createElement('input');radio.type='radio';radio.name='singleAnswer';radio.value=String(i);let t=document.createElement('span');t.className='codeopt';t.textContent=ABC[i]+'｜'+opt;line.append(radio,t);wrap.appendChild(line);});
+ if(q.kind==='multi')q.opts.forEach((opt,i)=>{let box=document.createElement('div');box.className='multiopt';let tt=document.createElement('div');tt.className='codeopt';tt.textContent=ABC[i]+'｜'+opt;let row=document.createElement('div');row.className='row';for(const v of ['correct','incorrect']){let lbl=document.createElement('label');let radio=document.createElement('input');radio.type='radio';radio.name='mark'+i;radio.value=v;let txt=document.createElement('span');txt.textContent=v==='correct'?'正確':'錯誤';lbl.append(radio,txt);row.appendChild(lbl);}box.append(tt,row);wrap.appendChild(box);});
+}
+function submitAnswer(unknown){
+ let q=current();if(!q)return;
+ if(q.section==='1-3A'&&Date.now()<RELEASE){render();return;}
+ let a={id:q.id,kind:q.kind,section:q.section,mode:q.mode,unknown:Boolean(unknown),choice:null,marks:null,text:null,reasonFirst:q.requiresReason?$('reasonFirst').value.trim():'',submittedAt:now(),seconds:Math.round((Date.now()-(startStamp||Date.now()))/1000)};
+ if(!unknown){
+ if(q.kind==='single'){const v=document.querySelector('input[name=singleAnswer]:checked');if(!v){alert('請選一項，或按「不會／不確定」。');return;}a.choice=Number(v.value);}
+ if(q.kind==='multi'){a.marks=[];for(let i=0;i<4;i++){let el=document.querySelector('input[name=mark'+i+']:checked');if(!el){alert('複選判斷題要 A～D 全部勾選正確或錯誤。');return;}a.marks.push(el.value==='correct');}}
+ if(q.kind==='text'){const v=$('qText').value;if(!v.trim()){alert('請輸入完整輸出；不會可按不會。');return;}a.text=v;}
+ if(q.requiresReason&&!validReason(a.reasonFirst)){alert('請寫出至少8字有意義的首次判斷理由及實際索引，不能只填答案。');return;}
+ }
+ if(S.answers[q.id]&&S.answers[q.id].submittedAt)return;
+ if(q.section==='1-3A'){a.delayGate={clientGate:'2026-10-24T23:50:00+08:00',clientClockPassed:Date.now()>=RELEASE,serverTimestampVerified:false};}
+ S.answers[q.id]=a;S.events.push({at:a.submittedAt,event:'FIRST_LOCKED',id:q.id,unknown:a.unknown});persist();render();
+}
+function renderReview(q){
+ if(!S.firstReviewStartedAt){S.firstReviewStartedAt=now();persist();}
+ show('review');$('rLabel').textContent=(doneReview()+1)+'/22｜'+q.section;
+ $('rPrompt').textContent=q.prompt;$('rCode').textContent=q.code||'';$('rCode').classList.toggle('hidden',!q.code);
+ let a=S.answers[q.id],correct=answerCorrect(q,a),f=$('rFeedback');
+ f.className='result'+(correct?'':' bad');
+ f.innerHTML='<b>首次回答：</b>'+escapeHTML(answerLabel(q,a))+'<p><b>首次判定：</b>'+(correct?'正確':'未通過')+'</p><p><b>標準答案：</b>'+escapeHTML(keyLabel(q))+'</p><p>'+escapeHTML(q.why)+'</p>';
+ document.querySelectorAll('input[name=understanding]').forEach(x=>x.checked=false);$('rNote').value='';$('rChecked').checked=false;
+}
+function submitReview(){
+ const q=currentReview();if(!q)return;const v=document.querySelector('input[name=understanding]:checked');if(!v||!$('rChecked').checked){alert('請選理解狀態及確認已核對原答。');return;}
+ const a=S.answers[q.id],n=$('rNote').value.trim();if(!answerCorrect(q,a)&&!validReason(n)){alert('首次未通過：請用自己的話寫出至少8字原因（不得只填重複字符）。');return;}
+ S.reviews[q.id]={understanding:v.value,note:n,parentReview:'PARENT_REVIEW_PENDING',confirmedAt:now()};persist();render();
+}
+function renderFinish(){
+ show('finish');let s=stats();const wrap=$('report');wrap.textContent='';
+ for(const [id,d] of Object.entries(s)){let p=document.createElement('div');p.className='splitline';let title=document.createElement('b');title.textContent=id+'：'+d.correct+'/'+d.total;let x=document.createElement('div');x.className='small';x.textContent='首次錯題：'+(d.wrongIds.join('、')||'無')+'｜'+(id==='1-2B'?'新單元初診':id==='1-3A'?'隔日條件新變式':'弱點新情境驗證');p.append(title,x);wrap.appendChild(p);}
+ let text=document.createElement('p');text.textContent='原始答案不可修改。理解狀態與文字理由待家長人工審核；沒有自動通過精熟。';wrap.appendChild(text);
+}
+function exported(){
+ const complete=doneFirst()===22,ss=stats();
+ const answers=QUESTIONS.filter(q=>S.answers[q.id]).map(q=>{const a=S.answers[q.id],b={id:q.id,section:q.section,mode:q.mode,kind:q.kind,question:q.prompt,code:q.code,options:q.opts||null,initialResponse:a,review:S.reviews[q.id]||null,standardAnswer:null,correctExplanation:null,firstCorrect:null};if(complete){b.standardAnswer=keyLabel(q);b.correctExplanation=q.why;b.firstCorrect=answerCorrect(q,a);}return b;});
+ return JSON.stringify({schema:SCHEMA,version:VERSION,createdAt:S.createdAt,firstStartedAt:S.firstStartedAt,exportedAt:now(),source:{subject:'ITS Python teacher lecture sections 1-1B,1-2A,1-2B,1-3A',priorMastersUnchanged:true,frozen1_2BSource:'ITS_1_2B_FOUNDATION_V1',frozen1_2BQuestions:12,original1_3BDelayedQuizExcluded:true},release:{scope:'1-3A',clientLocalGate:'2026-10-24T23:50:00+08:00',serverVerified:false},answers,metrics:{answered:doneFirst(),reviewed:doneReview(),sectionScores:complete?ss:null},mastery:'PARENT_REVIEW_AND_NEXT_DELAYED_GATE_PENDING',deviceQa:'NOT_VERIFIED_ON_STUDENT_IPHONE',gitSync:'EXPORT_PARENT_UPLOAD_REQUIRED',events:S.events},null,2);
+}
+function exportOpen(){returnView=['intro','quiz','gate','review','finish'].find(x=>!$(x).classList.contains('hidden'))||'intro';show('export');$('raw').value=exported();$('raw').classList.add('hidden');$('exportStatus').textContent='請確認實際有將檔案儲存或傳送給家長。';}
+function filename(){return 'enxiang_python_combined22_2026-10-24.json';}
+$('begin').onclick=()=>{if(!S.firstStartedAt)S.firstStartedAt=now();persist();render();};
+$('submit').onclick=()=>submitAnswer(false);$('unknown').onclick=()=>submitAnswer(true);
+$('confirm').onclick=submitReview;$('resume').onclick=render;
+['exportIntro','exportQuiz','exportGate','exportReview','exportFinish'].forEach(id=>$(id).onclick=exportOpen);
+$('back').onclick=render;
+$('showRaw').onclick=()=>{$('raw').classList.remove('hidden');$('raw').value=exported()};
+$('copy').onclick=async()=>{const v=exported();try{await navigator.clipboard.writeText(v);$('exportStatus').textContent='已複製完整 JSON，可貼到 LINE 給家長';}catch(e){$('raw').classList.remove('hidden');$('raw').value=v;$('raw').focus();$('raw').select();$('exportStatus').textContent='請手動選取完整 JSON 複製';}};
+$('download').onclick=()=>{try{const u=URL.createObjectURL(new Blob([exported()],{type:'application/json;charset=utf-8'}));const a=document.createElement('a');a.href=u;a.download=filename();document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),3000);$('exportStatus').textContent='已觸發下載，請檢查檔案是否真的存在';}catch(e){$('showRaw').click();$('exportStatus').textContent='下載不可用，改顯示原始 JSON';}};
+$('share').onclick=async()=>{try{const file=new File([exported()],filename(),{type:'application/json'});if(!navigator.share||!navigator.canShare||!navigator.canShare({files:[file]}))throw Error('unavailable');await navigator.share({files:[file],title:'恩翔 Python 今日整合測驗'});$('exportStatus').textContent='分享介面已返回，請確認真的已傳送或儲存';}catch(e){$('showRaw').click();$('exportStatus').textContent='分享未完成，改用下載或手動複製 JSON';}};
+render();
+})();
+</script></body></html>
